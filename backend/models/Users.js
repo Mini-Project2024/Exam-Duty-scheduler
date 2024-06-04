@@ -8,5 +8,9 @@ const UserSchema = new mongoose.Schema({
     dept: String,
 });
 
+
+
 const UserModel = mongoose.model("examduty", UserSchema);
+
+
 module.exports = UserModel;
