@@ -1,0 +1,38 @@
+.SidebarList{
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    background-color: #2f4850;
+}
+
+.SidebarList .row{
+    width: 100%;
+    height: 60px;
+    list-style-type: none;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    transition: background-color 0.3s, transform 0.5s;
+}
+
+.SidebarList .row:hover{
+    cursor: pointer;
+    background-color: #293846;
+}
+
+.SidebarList .active{
+    background-color: #293846;
+}
+
+.row #icon{
+    flex: 30%;
+    display: grid;
+    place-items: center;
+}
+
+.row #title{
+    flex: 70%;
+}
