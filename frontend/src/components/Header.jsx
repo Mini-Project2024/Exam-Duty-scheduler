@@ -14,9 +14,9 @@ const Header = ({ toggleTheme, themeClass,isDarkTheme, buttonThemeClass, transit
           <span className="text-2xl font-bold text-[#07506f] tracking-wide drop-shadow-lg">Duty Scheduler</span>
         </div>
         <div className="flex justify-between gap-6 items-center">
-          <button className="ml-2 w-5 h-5" onClick={toggleTheme}>
+          {/* <button className="ml-2 w-5 h-5" onClick={toggleTheme}>
             {isDarkTheme ? <LightModeOutlinedIcon/> : <DarkModeOutlinedIcon/>}
-          </button>
+          </button> */}
           <Button text="Logout" onClick={() => console.log('Logout clicked!')} extraClass={buttonThemeClass} />
         </div>
       </div>
