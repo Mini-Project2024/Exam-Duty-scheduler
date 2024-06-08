@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const AddExamDetails = () => {
   const [examDetails, setExamDetails] = useState({
     examName: '',
     examDate: '',
-    examTime: '',
+    session: '',
   });
   const [message, setMessage] = useState('');
   const [examData, setExamData] = useState([]);
@@ -25,7 +25,7 @@ const AddExamDetails = () => {
       console.log('Exam details added:', response.data);
       setMessage('Exam details added successfully!');
       setTimeout(() => {
-        setExamDetails({ examName: '', examDate: '', examTime: '' });
+        setExamDetails({ examName: '', examDate: '', session: '' });
         setMessage('');
         fetchExamData();
         setSelectedExam(null);
@@ -45,11 +45,6 @@ const AddExamDetails = () => {
       setMessage('Error fetching exam data.');
     }
   };
-  
-
-  useEffect(() => {
-    fetchExamData();
-  }, []);
 
   const handleDelete = async (id) => {
     try {
@@ -66,7 +61,7 @@ const AddExamDetails = () => {
     setExamDetails({
       examName: exam.examName,
       examDate: exam.examDate,
-      examTime: exam.examTime,
+      session: exam.session,
     });
     setSelectedExam(exam);
   };
@@ -78,7 +73,7 @@ const AddExamDetails = () => {
       console.log('Exam details updated:', response.data);
       setMessage('Exam details updated successfully!');
       setTimeout(() => {
-        setExamDetails({ examName: '', examDate: '', examTime: '' });
+        setExamDetails({ examName: '', examDate: '', session: '' });
         setMessage('');
         fetchExamData();
         setSelectedExam(null);
@@ -88,6 +83,10 @@ const AddExamDetails = () => {
       setMessage('Error updating exam details.');
     }
   };
+
+  useEffect(() => {
+    fetchExamData();
+  }, []);
 
   return (
     <section className="min-h-screen flex flex-col gap-4 items-center justify-center p-5 bg-gray-100">
@@ -117,28 +116,19 @@ const AddExamDetails = () => {
             />
           </div>
           <div>
-  <label className="block mb-2 text-sm font-medium text-gray-700">From:</label>
-  <input
-    type="time"
-    name="startTime"
-    value={examDetails.startTime}
-    onChange={handleChange}
-    required
-    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-  />
-</div>
-<div>
-  <label className="block mb-2 text-sm font-medium text-gray-700">To:</label>
-  <input
-    type="time"
-    name="endTime"
-    value={examDetails.endTime}
-    onChange={handleChange}
-    required
-    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
-  />
-</div>
-
+            <label className="block mb-2 text-sm font-medium text-gray-700">Session:</label>
+            <select
+              name="session"
+              value={examDetails.session}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            >
+              <option value="">-- Select Session --</option>
+              <option value="morning">Morning</option>
+              <option value="afternoon">Afternoon</option>
+            </select>
+          </div>
           <button type="submit" className="w-full bg-blue-500 text-white px-3 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300">
             {selectedExam ? 'Update Exam' : 'Add Exam'}
           </button>
@@ -152,16 +142,14 @@ const AddExamDetails = () => {
             <tr>
               <th className="px-4 py-2 border border-gray-300">Exam Name</th>
               <th className="px-4 py-2 border border-gray-300">Exam Date</th>
-              <th className="px-4 py-2 border border-gray-300">Start Time</th>
-              <th className="px-4 py-2 border border-gray-300">End Time</th>
+              <th className="px-4 py-2 border border-gray-300">Session</th>
               <th className="px-4 py-2 border border-gray-300">Action</th>
             </tr>
             {examData.map((exam) => (
               <tr key={exam._id}>
                 <td className="px-4 py-2 border border-gray-300">{exam.examName}</td>
                 <td className="px-4 py-2 border border-gray-300">{exam.examDate}</td>
-                <td className="px-4 py-2 border border-gray-300">{exam.startTime}</td>
-                <td className="px-4 py-2 border border-gray-300">{exam.endTime}</td>
+                <td className="px-4 py-2 border border-gray-300">{exam.session}</td>
                 <td className="px-4 py-2 border border-gray-300">
                   <button
                     className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300"

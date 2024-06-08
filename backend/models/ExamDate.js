@@ -9,14 +9,12 @@ const examDateSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  startTime: {
+  session: {
     type: String,
     required: true,
+    enum: ["morning", "afternoon"],
   },
-  endTime: {
-    type: String,
-    required: true,
-  },
+ 
 });
 
 const ExamDateModel = mongoose.model("ExamDate", examDateSchema);

@@ -1,27 +1,40 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const AssignDuty = () => {
-  const [selectedFaculty, setSelectedFaculty] = useState(""); // Selected faculty
-  const facultyList = ["Mr. X", "Ms. Y", "Mr. Z"];
+  const [facultyList, setFacultyList] = useState([]);
+  const [dates, setDates] = useState([]);
 
-  // Sample dates (replace with your actual date logic)
-  const [dates, setDates] = useState([
-    {
-      date: "2024-06-05",
-      assignedFaculty: "",
-      assigned: false,
-      session: "Morning", // Added session property
-    },
-    {
-      date: "2024-06-06",
-      assignedFaculty: "",
-      assigned: false,
-      session: "Evening",
-    },
-    { date: "2024-06-07", assignedFaculty: "", assigned: false, session: "Morning" },
-    { date: "2024-06-10", assignedFaculty: "", assigned: false, session: "Evening" },
-    { date: "2024-06-11", assignedFaculty: "", assigned: false, session: "Morning" },
-  ]);
+  useEffect(() => {
+    // Fetch faculty data
+    const fetchFacultyData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3106/faculty");
+        setFacultyList(response.data);
+      } catch (error) {
+        console.error("Error fetching faculty data:", error);
+      }
+    };
+
+    // Fetch exam dates data
+    const fetchDatesData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3106/getExamDetails");
+        const examDetails = response.data.map((exam) => ({
+          date: exam.examDate,
+          session: exam.session,
+          assignedFaculty: "",
+          assigned: false,
+        }));
+        setDates(examDetails);
+      } catch (error) {
+        console.error("Error fetching exam dates data:", error);
+      }
+    };
+
+    fetchFacultyData();
+    fetchDatesData();
+  }, []);
 
   // Function to handle faculty selection
   const handleFacultyChange = (event, dateIndex) => {
@@ -48,7 +61,7 @@ const AssignDuty = () => {
         date: dates[dateIndex].date,
         faculty: selectedFacultyForDate,
         session: dates[dateIndex].session,
-      })})`,
+      })}`
     );
   };
 
@@ -69,12 +82,8 @@ const AssignDuty = () => {
         <tbody>
           {dates.map((dateObj, index) => (
             <tr key={index}>
-              <td className="px-4 py-2 border border-gray-300">
-                {dateObj.date}
-              </td>
-              <td className="px-4 py-2 border border-gray-300">
-                {dateObj.session}
-              </td>
+              <td className="px-4 py-2 border border-gray-300">{dateObj.date}</td>
+              <td className="px-4 py-2 border border-gray-300">{dateObj.session}</td>
               <td className="px-4 py-2 border border-gray-300">
                 <select
                   id={`faculty-${index}`} // Unique ID for each select element
@@ -82,18 +91,16 @@ const AssignDuty = () => {
                   onChange={(event) => handleFacultyChange(event, index)}
                 >
                   <option value="">-- Select Faculty --</option>
-                  {facultyList.map((faculty, index) => (
-                    <option key={index} value={faculty}>
-                      {faculty}
+                  {facultyList.map((faculty) => (
+                    <option key={faculty._id} value={faculty.name}>
+                      {faculty.name}
                     </option>
                   ))}
                 </select>
               </td>
               <td className="px-4 py-2 border border-gray-300">
                 <button
-                  className={`text-${
-                    dateObj.assigned ? "blue" : "gray"
-                  }-500 underline`}
+                  className={`text-${dateObj.assigned ? "blue" : "gray"}-500 underline`}
                   onClick={() => handleAssign(index)}
                   disabled={!dateObj.assignedFaculty} // Disable button if no faculty selected
                 >
