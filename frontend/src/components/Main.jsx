@@ -11,6 +11,7 @@ import SideBar from "../components/SideBar";
 import AssignDuty from "./pages/AssignDuty";
 import FacultyDetails from "./pages/FacultyDetails";
 import MainContent from "./MainContent";
+import { Toaster } from "react-hot-toast";
 
 const Main = () => {
   const [isDarkTheme, setIsDarkTheme] = useState(false);
@@ -42,6 +43,7 @@ const Main = () => {
         <div className="flex flex-col flex-1">
           <MainContent />
           <Footer />
+          <Toaster />
         </div>
       </div>
     </div>

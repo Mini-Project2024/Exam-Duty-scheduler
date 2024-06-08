@@ -214,6 +214,12 @@ app.get("/assignedFaculty", async (req, res) => {
   }
 });
 
+//logout feature
+app.post('/logout', (req, res) => {
+  // Here you might handle session destruction or token invalidation.
+  res.status(200).json({ success: true, message: 'Logout successful' });
+});
+
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on http://localhost:${process.env.PORT}`);
 });

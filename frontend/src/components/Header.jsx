@@ -1,8 +1,7 @@
 import React from 'react';
 import logo from '../images/logo.png';
 import Button from './Button';
-import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
-import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
+import { logout } from './utils/auth';
 
 const Header = ({ toggleTheme, themeClass,isDarkTheme, buttonThemeClass, transitionClass }) => {
   const shadowClass = isDarkTheme ? 'shadow-gray-700' : 'shadow-md';
@@ -17,7 +16,7 @@ const Header = ({ toggleTheme, themeClass,isDarkTheme, buttonThemeClass, transit
           {/* <button className="ml-2 w-5 h-5" onClick={toggleTheme}>
             {isDarkTheme ? <LightModeOutlinedIcon/> : <DarkModeOutlinedIcon/>}
           </button> */}
-          <Button text="Logout" onClick={() => console.log('Logout clicked!')} extraClass={buttonThemeClass} />
+          <Button text="Logout" onClick={logout} extraClass={buttonThemeClass} />
         </div>
       </div>
     </header>

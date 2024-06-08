@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 const AddFaculty = () => {
   const [name, setName] = useState("");
@@ -20,7 +21,7 @@ const AddFaculty = () => {
       setFacultyData(response.data);
     } catch (error) {
       console.error(error);
-      setMessage("Error fetching faculty data.");
+      toast.error("Error fetching faculty data.");
     }
   };
 
@@ -38,7 +39,7 @@ const AddFaculty = () => {
         })
         .then((result) => {
           console.log(result);
-          setMessage("Faculty member added successfully!");
+          toast.success("Faculty member added successfully!");
           setTimeout(() => {
             clearForm();
             fetchFacultyData();
@@ -46,7 +47,7 @@ const AddFaculty = () => {
         })
         .catch((err) => {
           console.log(err);
-          setMessage("Error adding faculty member.");
+          toast.error("Error adding faculty member.");
         });
     }
   };
@@ -54,11 +55,11 @@ const AddFaculty = () => {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:3106/deleteFaculty/${id}`);
-      setMessage("Faculty member deleted successfully!");
+      toast.success("Faculty member deleted successfully!");
       fetchFacultyData();
     } catch (error) {
       console.error("Error deleting faculty member:", error);
-      setMessage("Error deleting faculty member.");
+      toast.error("Error deleting faculty member.");
     }
   };
 
@@ -77,14 +78,14 @@ const AddFaculty = () => {
         password, // Include password in the update request
         dept,
       });
-      setMessage("Faculty member updated successfully!");
+      toast.success("Faculty member updated successfully!");
       setTimeout(() => {
         clearForm();
         fetchFacultyData();
       }, 2000);
     } catch (error) {
       console.error("Error updating faculty member:", error);
-      setMessage("Error updating faculty member.");
+      toast.error("Error updating faculty member.");
     }
   };
 
@@ -99,6 +100,7 @@ const AddFaculty = () => {
 
   return (
     <section className="min-h-screen flex flex-col gap-4 items-center justify-center p-5 bg-gray-100">
+      <Toaster/>
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center">
           {selectedFaculty ? "Update Faculty Member" : "Add Faculty Member"}

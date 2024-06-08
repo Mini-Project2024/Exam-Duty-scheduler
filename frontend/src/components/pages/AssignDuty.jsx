@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const AssignDuty = () => {
   const [facultyList, setFacultyList] = useState([]);
@@ -81,7 +82,7 @@ const handleAssign = async (dateIndex) => {
   const selectedFacultyForDate = dates[dateIndex].assignedFaculty;
 
   if (!selectedFacultyForDate) {
-    console.error("Please select a faculty before assigning.");
+    toast.error("Please select a faculty before assigning.");
     return;
   }
 

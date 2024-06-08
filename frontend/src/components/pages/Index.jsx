@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 
 function Index() {
   const [username, setUsername] = useState('');
@@ -16,22 +17,27 @@ function Index() {
       
       // Check if the login was successful
       if (response.data.success) {
-        if(username=="myadmin" && password=="admin123")
-          navigate('/main');
+        if(username=="myadmin" && password=="admin123"){
+          toast.success("User Logged in successfully");
+          setTimeout(() => {
+            navigate('/main');
+          }, 1000);
+        }
         else
         navigate('/user-details');
       } else {
         // Handle failed login (user not found or invalid credentials)
-        alert('User not found or invalid credentials');
+        toast.error('User not found or invalid credentials');
       }
     } catch (error) {
       console.error('Error during login:', error);
-      alert('Error during login');
+      toast.error('Error during login');
     }
   };
 
   return (
     <div className="login-container flex flex-col justify-center items-center min-h-screen bg-[#2f4850] text-white p-8 max-w-sm mx-auto">
+      <Toaster/>
       <h1 className="text-3xl font-bold mb-4">Login</h1>
       <form onSubmit={handleSubmit}>
         <label htmlFor="username" className="text-white font-bold mb-2">

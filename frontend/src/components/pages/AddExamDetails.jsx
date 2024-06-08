@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 
 const AddExamDetails = () => {
   const [examDetails, setExamDetails] = useState({
@@ -23,7 +24,7 @@ const AddExamDetails = () => {
     try {
       const response = await axios.post('http://localhost:3106/addExamdate', examDetails);
       console.log('Exam details added:', response.data);
-      setMessage('Exam details added successfully!');
+      toast.success('Exam details added successfully!');
       setTimeout(() => {
         setExamDetails({ examName: '', examDate: '', session: '' });
         setMessage('');
@@ -32,7 +33,7 @@ const AddExamDetails = () => {
       }, 2000);
     } catch (error) {
       console.error('Error adding exam details:', error);
-      setMessage('Error adding exam details.');
+      toast.error('Error adding exam details.');
     }
   };
 
@@ -49,11 +50,11 @@ const AddExamDetails = () => {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:3106/deleteExamDate/${id}`);
-      setMessage('Exam details deleted successfully!');
+      toast.success('Exam details deleted successfully!');
       fetchExamData();
     } catch (error) {
       console.error('Error deleting exam details:', error);
-      setMessage('Error deleting exam details.');
+      toast.error('Error deleting exam details.');
     }
   };
   
@@ -72,7 +73,7 @@ const AddExamDetails = () => {
     try {
       const response = await axios.put(`http://localhost:3106/updateExamDate/${selectedExam._id}`, examDetails);
       console.log('Exam details updated:', response.data);
-      setMessage('Exam details updated successfully!');
+      toast.success('Exam details updated successfully!');
       setTimeout(() => {
         setExamDetails({ examName: '', examDate: '', session: '' });
         setMessage('');
@@ -81,7 +82,7 @@ const AddExamDetails = () => {
       }, 2000);
     } catch (error) {
       console.error('Error updating exam details:', error);
-      setMessage('Error updating exam details.');
+      toast.error('Error updating exam details.');
     }
   };
   
@@ -94,6 +95,7 @@ const AddExamDetails = () => {
 
   return (
     <section className="min-h-screen flex flex-col gap-4 items-center justify-center p-5 bg-gray-100">
+      <Toaster/>
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center">{selectedExam ? 'Update Exam Details' : 'Add Exam Details'}</h1>
         <form onSubmit={selectedExam ? handleUpdateSubmit : handleSubmit} className="space-y-4">
