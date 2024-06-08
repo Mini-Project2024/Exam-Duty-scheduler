@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Routes, Route } from "react-router-dom";
 import AssignDuty from "./pages/AssignDuty";
 import FacultyDetails from "./pages/FacultyDetails";

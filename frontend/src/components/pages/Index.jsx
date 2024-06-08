@@ -1,24 +1,39 @@
 import React, { useState } from 'react';
-import '../css/Index.css'; // Assuming your CSS file path
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
-function Index() { // Receive setIsAuthenticated as a prop
-  console.log('Index component rendered');
-
+function Index() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-  // const history=useHistory();
-  const HandleSubmit=(e)=>{
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // history.push('/main');
-    navigate('/main');
-    console.log("Hello");
-  }
+    
+    try {
+      // Send login request to backend
+      const response = await axios.post('http://localhost:3106/login', { username, password });
+      
+      // Check if the login was successful
+      if (response.data.success) {
+        if(username=="myadmin" && password=="admin123")
+          navigate('/main');
+        else
+        navigate('/user-details');
+      } else {
+        // Handle failed login (user not found or invalid credentials)
+        alert('User not found or invalid credentials');
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      alert('Error during login');
+    }
+  };
+
   return (
     <div className="login-container flex flex-col justify-center items-center min-h-screen bg-[#2f4850] text-white p-8 max-w-sm mx-auto">
       <h1 className="text-3xl font-bold mb-4">Login</h1>
-      <form onSubmit={HandleSubmit}>
+      <form onSubmit={handleSubmit}>
         <label htmlFor="username" className="text-white font-bold mb-2">
           Username
         </label>
@@ -28,7 +43,7 @@ function Index() { // Receive setIsAuthenticated as a prop
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
-          className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-600 mb-4"
+          className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-600 mb-4 text-black"
         />
         <label htmlFor="password" className="text-white font-bold mb-2">
           Password
@@ -39,7 +54,7 @@ function Index() { // Receive setIsAuthenticated as a prop
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-600 mb-4"
+          className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-600 mb-4 text-black"
         />
         <button
           type="submit"

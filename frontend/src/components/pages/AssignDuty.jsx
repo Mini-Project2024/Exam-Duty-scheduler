@@ -32,8 +32,40 @@ const AssignDuty = () => {
       }
     };
 
+    // Fetch assigned faculty details
+    const fetchAssignedFaculty = async () => {
+      try {
+        const response = await axios.get("http://localhost:3106/assignedFaculty");
+        const assignedFaculty = response.data;
+        
+        // Update dates state based on assigned faculty
+        const updatedDates = [...dates];
+        assignedFaculty.forEach((assignment) => {
+          // Convert the date string to Date object for comparison
+          const assignmentDate = new Date(assignment.date);
+          
+          // Find the index of the date in updatedDates
+          const dateIndex = updatedDates.findIndex(date => {
+            // Convert the date string to Date object for comparison
+            const currentDate = new Date(date.date);
+            // Compare the dates
+            return currentDate.toDateString() === assignmentDate.toDateString();
+          });
+          
+          // If the date is found, update the assigned status
+          if (dateIndex !== -1) {
+            updatedDates[dateIndex].assigned = true;
+          }
+        });
+        setDates(updatedDates);
+      } catch (error) {
+        console.error("Error fetching assigned faculty details:", error);
+      }
+    };
+    
     fetchFacultyData();
     fetchDatesData();
+    fetchAssignedFaculty();
   }, []);
 
   // Function to handle faculty selection
@@ -44,26 +76,32 @@ const AssignDuty = () => {
   };
 
   // Function to handle "Assign" button click for a specific date
-  const handleAssign = (dateIndex) => {
-    const updatedDates = [...dates];
-    const selectedFacultyForDate = updatedDates[dateIndex].assignedFaculty;
+ // Function to handle "Assign" button click for a specific date
+const handleAssign = async (dateIndex) => {
+  const selectedFacultyForDate = dates[dateIndex].assignedFaculty;
 
-    if (!selectedFacultyForDate) {
-      console.error("Please select a faculty before assigning.");
-      return;
-    }
+  if (!selectedFacultyForDate) {
+    console.error("Please select a faculty before assigning.");
+    return;
+  }
 
-    updatedDates[dateIndex].assigned = !updatedDates[dateIndex].assigned; // Toggle assigned state
-    setDates(updatedDates);
+  const updatedDates = [...dates];
+  updatedDates[dateIndex].assigned = true; // Set assigned to true
+  setDates(updatedDates);
 
-    console.log(
-      `${JSON.stringify({
-        date: dates[dateIndex].date,
-        faculty: selectedFacultyForDate,
-        session: dates[dateIndex].session,
-      })}`
-    );
-  };
+  try {
+    // Update the server with the new assigned status
+    const response = await axios.post("http://localhost:3106/assignDuty", {
+      date: updatedDates[dateIndex].date,
+      faculty: selectedFacultyForDate,
+      session: updatedDates[dateIndex].session,
+    });
+
+    console.log("Assignment saved:", response.data);
+  } catch (error) {
+    console.error("Error assigning duty:", error);
+  }
+};
 
   return (
     <section className="w-full h-full flex flex-col items-center p-4">

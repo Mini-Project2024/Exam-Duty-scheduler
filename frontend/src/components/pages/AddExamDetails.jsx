@@ -48,7 +48,7 @@ const AddExamDetails = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3106/deletedate/${id}`);
+      await axios.delete(`http://localhost:3106/deleteExamDate/${id}`);
       setMessage('Exam details deleted successfully!');
       fetchExamData();
     } catch (error) {
@@ -56,7 +56,7 @@ const AddExamDetails = () => {
       setMessage('Error deleting exam details.');
     }
   };
-
+  
   const handleUpdate = (exam) => {
     setExamDetails({
       examName: exam.examName,
@@ -66,10 +66,11 @@ const AddExamDetails = () => {
     setSelectedExam(exam);
   };
 
+
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`http://localhost:3106/api/exam-details/${selectedExam._id}`, examDetails);
+      const response = await axios.put(`http://localhost:3106/updateExamDate/${selectedExam._id}`, examDetails);
       console.log('Exam details updated:', response.data);
       setMessage('Exam details updated successfully!');
       setTimeout(() => {
@@ -83,6 +84,9 @@ const AddExamDetails = () => {
       setMessage('Error updating exam details.');
     }
   };
+  
+  
+  
 
   useEffect(() => {
     fetchExamData();
