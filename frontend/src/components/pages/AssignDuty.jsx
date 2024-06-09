@@ -1,118 +1,113 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 const AssignDuty = () => {
   const [facultyList, setFacultyList] = useState([]);
   const [dates, setDates] = useState([]);
 
   useEffect(() => {
-    // Fetch faculty data
-    const fetchFacultyData = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:3106/faculty");
-        setFacultyList(response.data);
-      } catch (error) {
-        console.error("Error fetching faculty data:", error);
-      }
-    };
+        const facultyResponse = await axios.get(
+          "http://localhost:3106/faculty"
+        );
 
-    // Fetch exam dates data
-    const fetchDatesData = async () => {
-      try {
-        const response = await axios.get("http://localhost:3106/getExamDetails");
-        const examDetails = response.data.map((exam) => ({
+        const filteredFacultyList = facultyResponse.data.filter(
+          (faculty) => faculty.name.toLowerCase() !== "myadmin"
+        );
+        setFacultyList(filteredFacultyList);
+
+        const datesResponse = await axios.get(
+          "http://localhost:3106/getExamDetails"
+        );
+        const examDetails = datesResponse.data.map((exam) => ({
           date: exam.examDate,
+          subject: exam.examName,
+          semester: exam.semester,
           session: exam.session,
           assignedFaculty: "",
           assigned: false,
         }));
-        setDates(examDetails);
-      } catch (error) {
-        console.error("Error fetching exam dates data:", error);
-      }
-    };
 
-    // Fetch assigned faculty details
-    const fetchAssignedFaculty = async () => {
-      try {
-        const response = await axios.get("http://localhost:3106/assignedFaculty");
-        const assignedFaculty = response.data;
-        
-        // Update dates state based on assigned faculty
-        const updatedDates = [...dates];
-        assignedFaculty.forEach((assignment) => {
-          // Convert the date string to Date object for comparison
-          const assignmentDate = new Date(assignment.date);
-          
-          // Find the index of the date in updatedDates
-          const dateIndex = updatedDates.findIndex(date => {
-            // Convert the date string to Date object for comparison
-            const currentDate = new Date(date.date);
-            // Compare the dates
-            return currentDate.toDateString() === assignmentDate.toDateString();
-          });
-          
-          // If the date is found, update the assigned status
-          if (dateIndex !== -1) {
-            updatedDates[dateIndex].assigned = true;
+        const assignedResponse = await axios.get(
+          "http://localhost:3106/assignedFaculty"
+        );
+        const assignedFaculty = assignedResponse.data;
+
+        const updatedDates = examDetails.map((dateObj) => {
+          const assignment = assignedFaculty.find(
+            (assign) =>
+              new Date(assign.date).toISOString() ===
+              new Date(dateObj.date).toISOString()
+          );
+          if (assignment) {
+            return {
+              ...dateObj,
+              assigned: true,
+              assignedFaculty: assignment.faculty,
+            };
           }
+          return dateObj;
         });
+
+        // Sort the dates by semester in ascending order
+        updatedDates.sort((a, b) => b.semester - a.semester);
+
         setDates(updatedDates);
       } catch (error) {
-        console.error("Error fetching assigned faculty details:", error);
+        console.error("Error fetching data:", error);
       }
     };
-    
-    fetchFacultyData();
-    fetchDatesData();
-    fetchAssignedFaculty();
+
+    fetchData();
   }, []);
 
-  // Function to handle faculty selection
   const handleFacultyChange = (event, dateIndex) => {
     const updatedDates = [...dates];
     updatedDates[dateIndex].assignedFaculty = event.target.value;
     setDates(updatedDates);
   };
 
-  // Function to handle "Assign" button click for a specific date
- // Function to handle "Assign" button click for a specific date
-const handleAssign = async (dateIndex) => {
-  const selectedFacultyForDate = dates[dateIndex].assignedFaculty;
+  const handleAssign = async (dateIndex) => {
+    const selectedFacultyForDate = dates[dateIndex].assignedFaculty;
 
-  if (!selectedFacultyForDate) {
-    toast.error("Please select a faculty before assigning.");
-    return;
-  }
+    if (!selectedFacultyForDate) {
+      toast.error("Please select a faculty before assigning.");
+      return;
+    }
 
-  const updatedDates = [...dates];
-  updatedDates[dateIndex].assigned = true; // Set assigned to true
-  setDates(updatedDates);
+    const updatedDates = [...dates];
+    updatedDates[dateIndex].assigned = true;
+    setDates(updatedDates);
 
-  try {
-    // Update the server with the new assigned status
-    const response = await axios.post("http://localhost:3106/assignDuty", {
-      date: updatedDates[dateIndex].date,
-      faculty: selectedFacultyForDate,
-      session: updatedDates[dateIndex].session,
-    });
+    try {
+      const response = await axios.post("http://localhost:3106/assignDuty", {
+        date: updatedDates[dateIndex].date,
+        faculty: selectedFacultyForDate,
+        session: updatedDates[dateIndex].session,
+        semester: updatedDates[dateIndex].semester,
+      });
 
-    console.log("Assignment saved:", response.data);
-  } catch (error) {
-    console.error("Error assigning duty:", error);
-  }
-};
+      toast.success("Duty assigned successfully");
+      console.log("Assignment saved:", response.data);
+    } catch (error) {
+      console.error("Error assigning duty:", error);
+      toast.error("Error assigning duty");
+    }
+  };
 
   return (
     <section className="w-full h-full flex flex-col items-center p-4">
+      <Toaster />
       <h1 className="text-2xl mb-4">Assign Duty</h1>
 
-      {/* Table */}
       <table className="table-auto w-full my-4">
         <thead>
           <tr>
             <th className="px-4 py-2 border border-gray-300">Date</th>
+            <th className="px-4 py-2 border border-gray-300">Subject</th>
+            <th className="px-4 py-2 border border-gray-300">Semester</th>
             <th className="px-4 py-2 border border-gray-300">Session</th>
             <th className="px-4 py-2 border border-gray-300">Faculty</th>
             <th className="px-4 py-2 border border-gray-300">Action</th>
@@ -121,13 +116,24 @@ const handleAssign = async (dateIndex) => {
         <tbody>
           {dates.map((dateObj, index) => (
             <tr key={index}>
-              <td className="px-4 py-2 border border-gray-300">{dateObj.date}</td>
-              <td className="px-4 py-2 border border-gray-300">{dateObj.session}</td>
-              <td className="px-4 py-2 border border-gray-300">
+              <td className="px-4 py-2 border border-gray-300 text-center">
+                {new Date(dateObj.date).toLocaleDateString()}
+              </td>
+              <td className="px-4 py-2 border border-gray-300 text-center">
+                {dateObj.subject}
+              </td>
+              <td className="px-4 py-2 border border-gray-300 text-center">
+                {dateObj.semester}
+              </td>
+              <td className="px-4 py-2 border border-gray-300 text-center">
+                {dateObj.session}
+              </td>
+              <td className="px-4 py-2 border border-gray-300 text-center justify-center">
                 <select
-                  id={`faculty-${index}`} // Unique ID for each select element
+                  id={`faculty-${index}`}
                   value={dateObj.assignedFaculty}
                   onChange={(event) => handleFacultyChange(event, index)}
+                  disabled={dateObj.assigned}
                 >
                   <option value="">-- Select Faculty --</option>
                   {facultyList.map((faculty) => (
@@ -137,11 +143,13 @@ const handleAssign = async (dateIndex) => {
                   ))}
                 </select>
               </td>
-              <td className="px-4 py-2 border border-gray-300">
+              <td className="px-4 py-2 border border-gray-300 text-center">
                 <button
-                  className={`text-${dateObj.assigned ? "blue" : "gray"}-500 underline`}
+                  className={`text-${
+                    dateObj.assigned ? "blue" : "gray"
+                  }-500 bg-[#3572EF] border-white text-white font-bold rounded-md px-4 py-2 w-24`}
                   onClick={() => handleAssign(index)}
-                  disabled={!dateObj.assignedFaculty} // Disable button if no faculty selected
+                  disabled={!dateObj.assignedFaculty || dateObj.assigned}
                 >
                   {dateObj.assigned ? "Assigned" : "Assign"}
                 </button>

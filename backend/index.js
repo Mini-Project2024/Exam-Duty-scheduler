@@ -173,7 +173,7 @@ const AssignmentModel = require("./models/Assign");
 // Route to handle assignment of duties
 app.post("/assignDuty", async (req, res) => {
   try {
-    const { date, faculty, session } = req.body;
+    const { date, faculty, session, semester } = req.body;
     
     // Create or update the assignment document
     const existingAssignment = await AssignmentModel.findOne({ date });
@@ -182,6 +182,7 @@ app.post("/assignDuty", async (req, res) => {
       // Update the existing assignment
       existingAssignment.faculty = faculty;
       existingAssignment.session = session;
+      existingAssignment.semester = semester;
       await existingAssignment.save();
     } else {
       // Create a new assignment document
@@ -189,6 +190,7 @@ app.post("/assignDuty", async (req, res) => {
         date,
         faculty,
         session,
+        semester,
       });
       await newAssignment.save();
     }

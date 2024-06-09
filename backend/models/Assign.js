@@ -13,6 +13,10 @@ const assignmentSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  semester: {
+    type: String,
+    required: true,
+  },
   assignedAt: {
     type: Date,
     default: Date.now,
