@@ -128,7 +128,7 @@ const AssignDuty = () => {
               <td className="px-4 py-2 border border-gray-300 text-center">
                 {dateObj.session}
               </td>
-              <td className="px-4 py-2 border border-gray-300 text-center justify-center">
+              <td className="px-4 py-2 border border-gray-300 text-center">
                 <select
                   id={`faculty-${index}`}
                   value={dateObj.assignedFaculty}
