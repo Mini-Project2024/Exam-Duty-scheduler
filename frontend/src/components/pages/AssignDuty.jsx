@@ -117,7 +117,11 @@ const AssignDuty = () => {
           {dates.map((dateObj, index) => (
             <tr key={index}>
               <td className="px-4 py-2 border border-gray-300 text-center">
-                {new Date(dateObj.date).toLocaleDateString()}
+                {new Date(dateObj.date).toLocaleDateString('en-US',{
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}
               </td>
               <td className="px-4 py-2 border border-gray-300 text-center">
                 {dateObj.subject}
@@ -147,7 +151,9 @@ const AssignDuty = () => {
                 <button
                   className={`text-${
                     dateObj.assigned ? "blue" : "gray"
-                  }-500 bg-[#3572EF] border-white text-white font-bold rounded-md px-4 py-2 w-24`}
+                  }-500 ${
+                    dateObj.assigned? "bg-[#4bb543]" : "bg-[#3572EF]"
+                  } border-white text-white font-bold rounded-md px-4 py-2 w-24`}
                   onClick={() => handleAssign(index)}
                   disabled={!dateObj.assignedFaculty || dateObj.assigned}
                 >
