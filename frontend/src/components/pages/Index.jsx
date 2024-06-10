@@ -24,7 +24,7 @@ function Index() {
           }, 1000);
         }
         else
-        navigate('/user-details');
+        navigate('/users');
       } else {
         // Handle failed login (user not found or invalid credentials)
         toast.error('User not found or invalid credentials');
