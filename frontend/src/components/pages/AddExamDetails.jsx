@@ -134,6 +134,7 @@ const AddExamDetails = () => {
               value={examDetails.examDate}
               onChange={handleChange}
               required
+              min={new Date().toISOString().split('T')[0]} 
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
             />
           </div>
