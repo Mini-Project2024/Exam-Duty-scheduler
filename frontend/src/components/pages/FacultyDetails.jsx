@@ -5,8 +5,9 @@ const FacultyDetails = () => {
   const [departments, setDepartments] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedFaculty, setSelectedFaculty] = useState('');
-  const [schedule, setSchedule] = useState({});
+  const [schedule, setSchedule] = useState([]);
   const [faculty, setFaculty] = useState({});
+  const [assignedDuty, setAssignedDuty] = useState([]);
 
   useEffect(() => {
     fetchFacultyData();
@@ -21,12 +22,12 @@ const FacultyDetails = () => {
       const facultyByDept = {};
 
       facultyData.forEach((faculty) => {
-        const { dept, name } = faculty;
+        const { dept, name, schedule } = faculty;
         deptSet.add(dept);
         if (!facultyByDept[dept]) {
           facultyByDept[dept] = {};
         }
-        facultyByDept[dept][name] = faculty.schedule || {}; // Adjust this line if your faculty data structure is different
+        facultyByDept[dept][name] = schedule || [];
       });
 
       setDepartments(Array.from(deptSet));
@@ -36,16 +37,29 @@ const FacultyDetails = () => {
     }
   };
 
+  const fetchAssignedDutyData = async (facultyName) => {
+    try {
+      const response = await axios.get(`http://localhost:3106/assignedFaculty?name=${facultyName}`);
+      let assignedDutyData = response.data;
+      assignedDutyData=assignedDutyData.sort((a, b) => a.semester - b.semester);
+      setAssignedDuty(assignedDutyData);
+    } catch (error) {
+      console.error("Error fetching assigned duty data", error);
+    }
+  };
+
   const handleDepartmentChange = (event) => {
     setSelectedDepartment(event.target.value);
     setSelectedFaculty('');
-    setSchedule({});
+    setSchedule([]);
+    setAssignedDuty([]);
   };
 
   const handleFacultyChange = (event) => {
     setSelectedFaculty(event.target.value);
     const facultySchedule = faculty[selectedDepartment]?.[event.target.value];
-    setSchedule(facultySchedule || {});
+    setSchedule(facultySchedule || []);
+    fetchAssignedDutyData(event.target.value);
   };
 
   const filteredFaculty = selectedDepartment && faculty[selectedDepartment];
@@ -86,20 +100,22 @@ const FacultyDetails = () => {
           </div>
         )}
       </div>
-      {selectedDepartment && selectedFaculty && schedule.date && schedule.session && (
+      {selectedDepartment && selectedFaculty && assignedDuty.length > 0 && (
         <center>
           <table className='border-2 border-gray-900 rounded'>
             <thead>
               <tr>
-                <th className='p-5 border-2 border-gray-900 rounded'>Date</th>
+                <th className='p-5 border-2 border-gray-900 rounded'>Semester</th>
+                <th className='p-5 border-2 border-gray-900 rounded'>Exam Date</th>
                 <th className='p-5 border-2 border-gray-900 rounded'>Session</th>
               </tr>
             </thead>
             <tbody>
-              {schedule.date.map((date, index) => (
+              {assignedDuty.map((entry, index) => (
                 <tr key={index}>
-                  <td className='p-5 border-2 border-gray-900 rounded'>{date}</td>
-                  <td className='p-5 border-2 border-gray-900 rounded'>{schedule.session[index]}</td>
+                  <td className='p-5 border-2 border-gray-900 rounded'>{entry.semester}</td>
+                  <td className='p-5 border-2 border-gray-900 rounded'>{entry.date}</td>
+                  <td className='p-5 border-2 border-gray-900 rounded'>{entry.session}</td>
                 </tr>
               ))}
             </tbody>

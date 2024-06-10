@@ -151,7 +151,9 @@ const AssignDuty = () => {
                 <button
                   className={`text-${
                     dateObj.assigned ? "blue" : "gray"
-                  }-500 bg-${dateObj.assigned ? "[#4BB543]" : "[#3572EF]"} border-white text-white font-bold rounded-md px-4 py-2 w-24`}
+                  }-500 ${
+                    dateObj.assigned? "bg-[#4bb543]" : "bg-[#3572EF]"
+                  } border-white text-white font-bold rounded-md px-4 py-2 w-24`}
                   onClick={() => handleAssign(index)}
                   disabled={!dateObj.assignedFaculty || dateObj.assigned}
                 >
