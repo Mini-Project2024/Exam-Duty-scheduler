@@ -6,11 +6,8 @@ Exam Duty Scheduler is a project aimed at automating the scheduling of exam duti
 
 - [Features](#features)
 - [Installation](#installation)
-- [Usage](#usage)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
-- [License](#license)
 - [Contributions](#contributions)
+- [Contact](#contact)
 
 ## Features
 
