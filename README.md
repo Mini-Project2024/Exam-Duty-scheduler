@@ -53,15 +53,16 @@ To install the Exam Duty Scheduler, follow these steps:
     npm start
    ```
 8. Go to the link from the frontend and to login to admin page enter the credentials
+   
    `Username` = myadmin
    `Password` = admin123
-9. The admin must assign the faculty username, email and password in the admin page
-10. After the admin has created the faculty-user they may login to faculty page
-11. Roles of admin:
+10. The admin must assign the faculty username, email and password in the admin page
+11. After the admin has created the faculty-user they may login to faculty page
+12. Roles of admin:
     + Create the faculty account
     + Add the examination date
     + Assign duty to faculty
-12. Roles of Faculty:
+13. Roles of Faculty:
     + May view their work assigned
     + May shift thier work with other faculty with the `admin` approval.
 
