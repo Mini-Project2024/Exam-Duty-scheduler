@@ -55,6 +55,7 @@ To install the Exam Duty Scheduler, follow these steps:
 8. Go to the link from the frontend and to login to admin page enter the credentials
    
    `Username` = myadmin
+   
    `Password` = admin123
 10. The admin must assign the faculty username, email and password in the admin page
 11. After the admin has created the faculty-user they may login to faculty page
