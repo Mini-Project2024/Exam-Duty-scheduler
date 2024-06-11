@@ -77,7 +77,7 @@ This is a team project, and we grateful for the contributions of all team member
 
 
 
-Thank you for your hard work and dedication in making CONNECTO a reality!
+Thank you for your hard work and dedication in making Exam-Duty-Scheduler a reality!
 
 ## Contact
 
