@@ -70,8 +70,8 @@ To install the Exam Duty Scheduler, follow these steps:
 
 This is a team project, and we grateful for the contributions of all team members:
 
-<a href="https://github.com/Mini-Project2024/Connecto/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=Mini-Project2024/Connecto&nocache=1" />
+<a href="https://github.com/Mini-Project2024/Exam-Duty-scheduler/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=Mini-Project2024/Exam-Duty-scheduler&nocache=1" />
 </a>
 
 
