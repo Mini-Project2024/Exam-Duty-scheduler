@@ -41,11 +41,11 @@ To install the Exam Duty Scheduler, follow these steps:
    ```
 5. Run the frontend folder with the command
    ```bash
-    nmp run dev
+    npm run dev
    ```
 6. In backend create a `.env' file and add the MongoDB url
    ```
-    MONGODB_URL = "Your Url"
+    MONGODB_URL = "YOUR_MONGODB_URL"
     PORT = 3106
    ```
 7. Run the backend folder by the command
