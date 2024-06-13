@@ -8,7 +8,7 @@ const UserSidebar = ({ themeClass, transitionClass }) => {
 
   return (
     <section
-      className={`h-full bg-[#2f4850] w-72 left-0 ${transitionClass} ${themeClass}`}
+      className={` bg-[#2f4850] w-72 left-0  h-100 ${transitionClass} ${themeClass}`}
     >
       <ul className="SidebarList">
         {Userdata.map((val, key) => (
