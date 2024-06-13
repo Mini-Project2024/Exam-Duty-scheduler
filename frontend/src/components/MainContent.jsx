@@ -4,6 +4,8 @@ import AssignDuty from "./pages/AssignDuty";
 import FacultyDetails from "./pages/FacultyDetails";
 import AddFaculty from "./pages/AddFaculty";
 import AddExamDetails from "./pages/AddExamDetails";
+import UserDetails from "./pages/UserDetails";
+import ExchangeFaculty from "./pages/ExchangeFaculty";
 
 const MainContent = () => {
   return (
@@ -13,6 +15,8 @@ const MainContent = () => {
         <Route path="/facultydetails" element={<FacultyDetails />} />
         <Route path="/addFaculty" element={<AddFaculty/>} />
         <Route path="/examDates" element={<AddExamDetails />} />
+        <Route path="/DutyDetails" element={<UserDetails />} />
+        <Route path="/Exchange" element={<ExchangeFaculty />} />
       </Routes>
     </div>
   );
