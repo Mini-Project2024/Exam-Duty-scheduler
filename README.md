@@ -1,6 +1,6 @@
 # Exam Duty Scheduler
 
-Exam Duty Scheduler is a project aimed at automating the scheduling of exam duties for faculty members. This tool ensures a fair and balanced distribution of duties, taking into account various constraints and preferences.
+Exam Duty Scheduler is a project aimed to streamline the manual scheduling of exam duties for faculty members. This tool ensures a fair and balanced distribution of duties, taking into account various constraints and preferences.
 
 ## Table of Contents
 
