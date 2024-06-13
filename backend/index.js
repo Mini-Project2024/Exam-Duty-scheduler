@@ -61,6 +61,19 @@ app.post("/addFaculty", async (req, res) => {
   }
 });
 
+app.get("/faculty/:department", (req, res) => {
+  const department = req.params.department.toLowerCase().replace(/ /g, "_");
+  const filePath = path.join(__dirname, 'data', `${department}.json`);
+
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error("Error reading faculty data:", err);
+      return res.status(404).json({ message: "Faculty data not found for this department." });
+    }
+    res.json(JSON.parse(data));
+  });
+});
+
 //fetch faculty
 app.get("/faculty", async (req, res) => {
   try {
