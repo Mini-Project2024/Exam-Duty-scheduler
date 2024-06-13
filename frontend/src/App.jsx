@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./components/pages/Index";
 import Main from "./components/Main";
-import User from "./components/pages/User";
+import User from "./components/User";
 const App = () => {
   return (
     <BrowserRouter>
