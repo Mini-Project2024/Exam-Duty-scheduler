@@ -14,8 +14,9 @@ const AssignDuty = () => {
         axios.get("http://localhost:3106/assignedFaculty")
       ]);
 
-      console.log('Faculty Response:', facultyResponse.data);
-      console.log('Dates Response:', datesResponse.data);
+      // console.log('Faculty Response:', facultyResponse.data);
+      // console.log('Dates Response:', datesResponse.data);
+      console.log('Assigned Response:', assignedResponse);
 
       const facultyData = facultyResponse.data.filter(faculty => faculty.name.toLowerCase() !== "myadmin");
       setFacultyList(facultyData);
