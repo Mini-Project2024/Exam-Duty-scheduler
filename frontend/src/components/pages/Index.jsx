@@ -11,9 +11,12 @@ function Index() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
+    
     e.preventDefault();
+    // navigate('/main');
     
     try {
+
       // Send login request to backend
       const response = await axios.post('http://localhost:3106/login', { username, password });
       

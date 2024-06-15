@@ -1,10 +1,5 @@
 [
   {
-    "is_faculty_name": "Dr. H Manoj T Gadiyar",
-    "is_faculty_designation": "Associate Professor & HoD",
-    "is_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120230024.jpg"
-  },
-  {
     "is_faculty_name": "Dr. Usha G R",
     "is_faculty_designation": "Associate Professor",
     "is_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120240009.jpg"
@@ -68,35 +63,5 @@
     "is_faculty_name": "Sandeep Kini M",
     "is_faculty_designation": "Assistant Professor",
     "is_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120240013.jpg"
-  },
-  {
-    "is_faculty_name": "Prajwal Benet Tellis",
-    "is_faculty_designation": "Foreman/Resident Engineer",
-    "is_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120150020.jpg"
-  },
-  {
-    "is_faculty_name": "B. Rajesh Rao",
-    "is_faculty_designation": "Sr. Lab Instructor",
-    "is_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120070014.jpg"
-  },
-  {
-    "is_faculty_name": "Sumithra",
-    "is_faculty_designation": "Lab Instructor",
-    "is_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120070012.jpg"
-  },
-  {
-    "is_faculty_name": "Subrahmanya V",
-    "is_faculty_designation": "Lab Instructor",
-    "is_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120160011.jpg"
-  },
-  {
-    "is_faculty_name": "Pavithra",
-    "is_faculty_designation": "Lab Instructor",
-    "is_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120220005.jpg"
-  },
-  {
-    "is_faculty_name": "Bhavya",
-    "is_faculty_designation": "Lab Instructor",
-    "is_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120220027.jpg"
   }
 ]

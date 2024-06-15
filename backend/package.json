@@ -4,6 +4,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
+    "importFaculty": "node importFaculty.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

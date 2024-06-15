@@ -1,15 +1,5 @@
 [
   {
-    "mech_faculty_name": "Dr. N. Venkatesh",
-    "mech_faculty_designation": "Dr. N. Venkatesh",
-    "mech_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120120008.jpg"
-  },
-  {
-    "mech_faculty_name": "Dr.Niranjan Rai",
-    "mech_faculty_designation": "Professor & HOD",
-    "mech_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120060004.jpg"
-  },
-  {
     "mech_faculty_name": "Naveen A Kalal",
     "mech_faculty_designation": "Dr.Niranjan Rai",
     "mech_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120070007.jpg"
@@ -48,65 +38,5 @@
     "mech_faculty_name": "Ganesh Narayan Moger",
     "mech_faculty_designation": "Assistant Professor",
     "mech_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120130030.jpg"
-  },
-  {
-    "mech_faculty_name": "Nagesha",
-    "mech_faculty_designation": "Sandesh Kamath",
-    "mech_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120070015.jpg"
-  },
-  {
-    "mech_faculty_name": null,
-    "mech_faculty_designation": "Assistant Professor",
-    "mech_faculty_pic": null
-  },
-  {
-    "mech_faculty_name": null,
-    "mech_faculty_designation": "Shreenath",
-    "mech_faculty_pic": null
-  },
-  {
-    "mech_faculty_name": null,
-    "mech_faculty_designation": "Assistant Professor",
-    "mech_faculty_pic": null
-  },
-  {
-    "mech_faculty_name": null,
-    "mech_faculty_designation": "Vinod Kumar M.V",
-    "mech_faculty_pic": null
-  },
-  {
-    "mech_faculty_name": null,
-    "mech_faculty_designation": "Assistant Professor",
-    "mech_faculty_pic": null
-  },
-  {
-    "mech_faculty_name": null,
-    "mech_faculty_designation": "Gowrish Nagvekar B",
-    "mech_faculty_pic": null
-  },
-  {
-    "mech_faculty_name": null,
-    "mech_faculty_designation": "Assistant Professor",
-    "mech_faculty_pic": null
-  },
-  {
-    "mech_faculty_name": null,
-    "mech_faculty_designation": "Ganesh Narayan Moger",
-    "mech_faculty_pic": null
-  },
-  {
-    "mech_faculty_name": null,
-    "mech_faculty_designation": "Lab Instructor",
-    "mech_faculty_pic": null
-  },
-  {
-    "mech_faculty_name": null,
-    "mech_faculty_designation": "Nagesha",
-    "mech_faculty_pic": null
-  },
-  {
-    "mech_faculty_name": null,
-    "mech_faculty_designation": "Mechanic",
-    "mech_faculty_pic": null
   }
 ]

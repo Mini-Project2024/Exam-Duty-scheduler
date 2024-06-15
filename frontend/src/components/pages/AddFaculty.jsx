@@ -4,10 +4,11 @@ import toast, { Toaster } from "react-hot-toast";
 
 const AddFaculty = () => {
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  // const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [dept, setDept] = useState("CSE");
   const [message, setMessage] = useState("");
+  const [designation, setDesignation] = useState("");
   const [facultyData, setFacultyData] = useState([]);
   const [selectedFaculty, setSelectedFaculty] = useState(null);
 
@@ -33,7 +34,7 @@ const AddFaculty = () => {
       axios
         .post("http://localhost:3106/addFaculty", {
           name,
-          email,
+          designation,
           password,
           dept,
         })
@@ -66,7 +67,8 @@ const AddFaculty = () => {
   const handleUpdate = (faculty) => {
     setSelectedFaculty(faculty);
     setName(faculty.name);
-    setEmail(faculty.email);
+    setDesignation(faculty.designation);
+    // setEmail(faculty.email);
     setDept(faculty.dept);
   };
 
@@ -74,7 +76,7 @@ const AddFaculty = () => {
     try {
       await axios.put(`http://localhost:3106/updateFaculty/${selectedFaculty._id}`, {
         name,
-        email,
+        designation,
         password, // Include password in the update request
         dept,
       });
@@ -91,7 +93,8 @@ const AddFaculty = () => {
 
   const clearForm = () => {
     setName("");
-    setEmail("");
+    setDesignation("");
+    // setEmail("");
     setPassword("");
     setDept("CSE");
     setMessage("");
@@ -118,12 +121,12 @@ const AddFaculty = () => {
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Email:</label>
+            <label className="block mb-2 text-sm font-medium text-gray-700">Designation:</label>
             <input
-              type="email"
-              name="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              name="designation"
+              value={designation}
+              onChange={(e) => setDesignation(e.target.value)}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
             />
@@ -176,14 +179,14 @@ const AddFaculty = () => {
           <tbody>
             <tr>
               <th className="px-4 py-2 border border-gray-300">Name</th>
-              <th className="px-4 py-2 border border-gray-300">Email</th>
+              <th className="px-4 py-2 border border-gray-300">Designation</th>
               <th className="px-4 py-2 border border-gray-300">Dept</th>
               <th className="px-4 py-2 border border-gray-300">Action</th>
             </tr>
             {facultyData.map((faculty) => (
               <tr key={faculty._id}>
                 <td className="px-4 py-2 border border-gray-300">{faculty.name}</td>
-                <td className="px-4 py-2 border border-gray-300">{faculty.email}</td>
+                <td className="px-4 py-2 border border-gray-300">{faculty.designation}</td>
                 <td className="px-4 py-2 border border-gray-300">{faculty.dept}</td>
                 <td className="px-4 py-2 border border-gray-300">
                   <button

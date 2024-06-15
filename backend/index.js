@@ -1,17 +1,15 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 const cors = require("cors");
 const UserModel = require("./models/Users");
 const examDateModel = require("./models/ExamDate");
 const AssignmentModel = require("./models/Assign");
-const path=require('path');
-
-const fs = require('fs');
+const path = require("path");
+const fs = require("fs");
 require("dotenv").config();
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
@@ -23,8 +21,11 @@ db.once("open", () => {
 });
 
 
+
+
+
 // Login route
-app.post('/login', async (req, res) => {
+app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
@@ -33,32 +34,46 @@ app.post('/login', async (req, res) => {
 
     // Check if user exists
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     // Compare passwords
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
 
     // User authenticated successfully
-    res.status(200).json({ success: true, message: 'Login successful' });
+    res.status(200).json({ success: true, message: "Login successful" });
   } catch (error) {
-    console.error('Error during login:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error("Error during login:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
 // API routes
+
+// Add faculty route with random password generation
 app.post("/addFaculty", async (req, res) => {
   try {
-    const { name, email, password, dept } = req.body;
+    const { name, designation, password, dept } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newFaculty = new UserModel({ name, email, password: hashedPassword, dept });
+
+    const newFaculty = new UserModel({
+      name,
+      designation,
+      password: hashedPassword,
+      dept,
+    });
     await newFaculty.save();
     res.json(newFaculty);
+    // Return the newly created faculty member with password included
+    // res.json({ ...newFaculty.toObject() });
   } catch (error) {
     console.error("Error adding faculty:", error);
     res.status(400).json({ message: "Error adding faculty member." });
@@ -66,37 +81,56 @@ app.post("/addFaculty", async (req, res) => {
 });
 
 
-// fetch faculty names based on department from JSON files
-app.get('/api/faculty-files', (req, res) => {
-  const { department } = req.query;
 
-  if (!department) {
-    return res.status(400).json({ error: 'Department parameter is required' });
+// fetch faculty names based on department from JSON files
+app.get("/faculty/:dept.json", async (req, res) => {
+  const { dept } = req.params; // use req.params.dept to get the department
+
+  if (!dept) {
+    return res.status(400).json({ error: "Department parameter is required" });
   }
 
-  const filename = `${department}.json`;
-  const filePath = path.join(__dirname, 'faculty', filename);
+  const filename = `${dept}.json`;
+  const filePath = path.join(__dirname, "faculty", filename);
 
   try {
     // Read the JSON file
-    const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const content = JSON.parse(fs.readFileSync(filePath, "utf8"));
 
     // Extract faculty names and designations from the JSON content
-    const facultyNameKey = `${department}_faculty_name`;
-    const facultyDesignationKey = `${department}_faculty_designation`;
+    const facultyNameKey = `${dept}_faculty_name`;
+    const facultyDesignationKey = `${dept}_faculty_designation`;
 
-    const facultyName = content.map(item => ({
-      name: item[facultyNameKey],
-      }));
+    // Fetch hashed passwords from MongoDB
+    const facultyFromDB = await UserModel.find({ dept }).select(
+      "name email password"
+    );
 
-    res.json(facultyName);
+    // Map JSON content and add hashed password from DB if available
+    const facultyNames = content.map((item) => {
+      const facultyInfo = {
+        name: item[facultyNameKey],
+        designation: item[facultyDesignationKey], // include designation if needed
+      };
+
+      // Find matching user from DB and add hashed password
+      const matchedUser = facultyFromDB.find(
+        (user) =>
+          user.name === facultyInfo.name && user.email === facultyInfo.email
+      );
+      if (matchedUser) {
+        facultyInfo.password = matchedUser.password;
+      }
+
+      return facultyInfo;
+    });
+
+    res.json(facultyNames);
   } catch (error) {
     console.error(`Error reading file ${filename}:`, error);
-    res.status(500).json({ error: 'Error fetching faculty data' });
+    res.status(500).json({ error: "Error fetching faculty data" });
   }
 });
-
-
 
 //fetch faculty
 app.get("/faculty", async (req, res) => {
@@ -109,23 +143,27 @@ app.get("/faculty", async (req, res) => {
   }
 });
 
-app.delete('/deleteFaculty/:id', async (req, res) => {
+// Delete faculty member
+app.delete("/deleteFaculty/:id", async (req, res) => {
   try {
     const { id } = req.params;
     await UserModel.findByIdAndDelete(id);
-    // await deleteAllAssignmentsOfFaculty(id); // Call the new endpoint
-    res.status(200).json({ success: true, message: 'Faculty member deleted successfully.' });
+    res
+      .status(200)
+      .json({ success: true, message: "Faculty member deleted successfully." });
   } catch (error) {
-    console.error('Error deleting faculty member:', error);
-    res.status(500).json({ success: false, message: 'Error deleting faculty member.' });
+    console.error("Error deleting faculty member:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error deleting faculty member." });
   }
 });
 
-app.put('/updateFaculty/:id', async (req, res) => {
+// Update faculty member
+app.put("/updateFaculty/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { name, email, password, dept } = req.body;
-    console.log('Updating faculty details:', { id, name, email, password, dept });
 
     let updatedData = { name, email, dept };
 
@@ -134,19 +172,30 @@ app.put('/updateFaculty/:id', async (req, res) => {
       updatedData.password = hashedPassword;
     }
 
-    const updatedFaculty = await UserModel.findByIdAndUpdate(id, updatedData, { new: true });
-    await AssignmentModel.updateMany({ faculty: id }, { $set: { faculty: updatedFaculty } }).exec();
-    console.log('Updated faculty:', updatedFaculty);
+    const updatedFaculty = await UserModel.findByIdAndUpdate(id, updatedData, {
+      new: true,
+    });
+    console.log("Updated faculty:", updatedFaculty);
 
     if (!updatedFaculty) {
-      console.error('Faculty not found.');
-      return res.status(404).json({ success: false, message: 'Faculty not found.' });
+      console.error("Faculty not found.");
+      return res
+        .status(404)
+        .json({ success: false, message: "Faculty not found." });
     }
 
-    res.status(200).json({ success: true, message: 'Faculty details updated successfully.', data: updatedFaculty });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Faculty details updated successfully.",
+        data: updatedFaculty,
+      });
   } catch (error) {
-    console.error('Error updating faculty details:', error);
-    res.status(500).json({ success: false, message: 'Error updating faculty details.' });
+    console.error("Error updating faculty details:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error updating faculty details." });
   }
 });
 //Add date
@@ -192,38 +241,59 @@ app.get("/getExamDetails", async (req, res) => {
 });
 
 // Delete exam date
-app.delete('/deleteExamDate/:id', async (req, res) => {
+app.delete("/deleteExamDate/:id", async (req, res) => {
   try {
     const { id } = req.params;
     await examDateModel.findByIdAndDelete(id);
     // await deleteAllAssignmentsOfExamDate(id); // Call the new endpoint
-    res.status(200).json({ success: true, message: 'Exam details deleted successfully.' });
+    res
+      .status(200)
+      .json({ success: true, message: "Exam details deleted successfully." });
   } catch (error) {
-    console.error('Error deleting exam details:', error);
-    res.status(500).json({ success: false, message: 'Error deleting exam details.' });
+    console.error("Error deleting exam details:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error deleting exam details." });
   }
 });
 
 // Update exam date
-app.put('/updateExamDate/:id', async (req, res) => {
+app.put("/updateExamDate/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { examName, examDate, session } = req.body;
-    console.log('Updating exam details:', { id, examName, examDate, session });
+    console.log("Updating exam details:", { id, examName, examDate, session });
 
-    const updatedExam = await examDateModel.findByIdAndUpdate(id, { examName, examDate, session }, { new: true });
-    await AssignmentModel.updateMany({ date: id }, { $set: { date: updatedExamDate } }).exec();
-    console.log('Updated exam:', updatedExam);
+    const updatedExam = await examDateModel.findByIdAndUpdate(
+      id,
+      { examName, examDate, session },
+      { new: true }
+    );
+    await AssignmentModel.updateMany(
+      { date: id },
+      { $set: { date: updatedExamDate } }
+    ).exec();
+    console.log("Updated exam:", updatedExam);
 
     if (!updatedExam) {
-      console.error('Exam not found.');
-      return res.status(404).json({ success: false, message: 'Exam not found.' });
+      console.error("Exam not found.");
+      return res
+        .status(404)
+        .json({ success: false, message: "Exam not found." });
     }
 
-    res.status(200).json({ success: true, message: 'Exam details updated successfully.', data: updatedExam });
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "Exam details updated successfully.",
+        data: updatedExam,
+      });
   } catch (error) {
-    console.error('Error updating exam details:', error);
-    res.status(500).json({ success: false, message: 'Error updating exam details.' });
+    console.error("Error updating exam details:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error updating exam details." });
   }
 });
 
@@ -260,7 +330,7 @@ app.put('/updateExamDate/:id', async (req, res) => {
 // });
 // Route to handle assignment of duties
 
-app.post('/assignDuty', async (req, res) => {
+app.post("/assignDuty", async (req, res) => {
   try {
     const { examDateId, facultyId, session, semester, subject } = req.body;
 
@@ -276,20 +346,27 @@ app.post('/assignDuty', async (req, res) => {
 
     res.status(201).json(newAssignment);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to assign duty', error });
+    res.status(500).json({ message: "Failed to assign duty", error });
   }
 });
-
 
 //fetch assigneddata
 
 app.get("/assignedFaculty", async (req, res) => {
   try {
-    const assignments = await AssignmentModel.find().populate('examDateId').populate('facultyId');
+    const assignments = await AssignmentModel.find()
+      .populate("examDateId")
+      .populate("facultyId");
     res.status(200).json(assignments);
   } catch (error) {
     console.error("Error fetching assigned duty data:", error);
-    res.status(500).json({ success: false, message: 'Error fetching assigned duty data', error: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error fetching assigned duty data",
+        error: error.message,
+      });
   }
 });
 // New route to get assigned duties for a specific faculty
@@ -304,9 +381,9 @@ app.get("/assignedFaculty", async (req, res) => {
 //   }
 // });
 //logout feature
-app.post('/logout', (req, res) => {
+app.post("/logout", (req, res) => {
   // Here you might handle session destruction or token invalidation.
-  res.status(200).json({ success: true, message: 'Logout successful' });
+  res.status(200).json({ success: true, message: "Logout successful" });
 });
 
 app.listen(process.env.PORT, () => {
