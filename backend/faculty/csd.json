@@ -1,10 +1,5 @@
 [
   {
-    "csd_faculty_name": "Dr. Praahas Amin",
-    "csd_faculty_designation": "Associate Professor & HoD",
-    "csd_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120230001.jpg"
-  },
-  {
     "csd_faculty_name": "Mr. M H Soorajprasad",
     "csd_faculty_designation": "Assistant Professor",
     "csd_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120220030.jpg"
@@ -28,25 +23,5 @@
     "csd_faculty_name": "Anantha Krishna Kamath",
     "csd_faculty_designation": "Lab Instructor",
     "csd_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120060005.jpg"
-  },
-  {
-    "csd_faculty_name": "Prajwal",
-    "csd_faculty_designation": "Lab Instructor",
-    "csd_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120220019.jpg"
-  },
-  {
-    "csd_faculty_name": "Ms. Janitha",
-    "csd_faculty_designation": "Lab Instructor",
-    "csd_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120220026.jpg"
-  },
-  {
-    "csd_faculty_name": "Ms. Niveditha",
-    "csd_faculty_designation": "Lab Instructor",
-    "csd_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120230017.jpg"
-  },
-  {
-    "csd_faculty_name": "Ms. Likhitha",
-    "csd_faculty_designation": null,
-    "csd_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120240004.jpg"
   }
 ]

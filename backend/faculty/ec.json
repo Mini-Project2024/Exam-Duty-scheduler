@@ -1,15 +1,5 @@
 [
   {
-    "ec_faculty_name": "Dr.Dayananda G.K",
-    "ec_faculty_designation": "Professor and HOD",
-    "ec_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120140014.jpg"
-  },
-  {
-    "ec_faculty_name": "Dr. Ganesh V Bhat",
-    "ec_faculty_designation": "Professor",
-    "ec_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120020001.jpg"
-  },
-  {
     "ec_faculty_name": "Raghavendra M Shetty K",
     "ec_faculty_designation": "Assistant Professor",
     "ec_faculty_pic": "https://www.canaraengineering.in/departments/faculty/Raghavendra.jpg"
@@ -73,35 +63,5 @@
     "ec_faculty_name": "Ramesh E",
     "ec_faculty_designation": "Assistant Professor",
     "ec_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120140016.jpg"
-  },
-  {
-    "ec_faculty_name": "Naveena K",
-    "ec_faculty_designation": "Foreman",
-    "ec_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120050007.jpg"
-  },
-  {
-    "ec_faculty_name": "Ganesh B",
-    "ec_faculty_designation": "Sr. Lab Instructor",
-    "ec_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120080008.jpg"
-  },
-  {
-    "ec_faculty_name": "Lavanya B",
-    "ec_faculty_designation": "Lab Instructor",
-    "ec_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120080009.jpg"
-  },
-  {
-    "ec_faculty_name": "Poornima",
-    "ec_faculty_designation": "Lab Instructor",
-    "ec_faculty_pic": "https://www.canaraengineering.in/departments/faculty/poornima.jpg"
-  },
-  {
-    "ec_faculty_name": "Pavithra",
-    "ec_faculty_designation": "Lab Instructor",
-    "ec_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120150004.jpg"
-  },
-  {
-    "ec_faculty_name": "Lohith",
-    "ec_faculty_designation": "Lab Instructor",
-    "ec_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120190003.jpg"
   }
 ]

@@ -1,15 +1,5 @@
 [
   {
-    "sc_faculty_name": "Dr. N. Satheesh Kumar",
-    "sc_faculty_designation": "Professor & HOD",
-    "sc_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120120004.jpg"
-  },
-  {
-    "sc_faculty_name": "Dr. Priya V Frank",
-    "sc_faculty_designation": "Professor",
-    "sc_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120010002.jpg"
-  },
-  {
     "sc_faculty_name": "Dr. Lavanya D Kateel",
     "sc_faculty_designation": "Assistant Professor",
     "sc_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120070010.jpg"
@@ -110,13 +100,7 @@
     "sc_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120230026.jpg"
   },
   {
-    "sc_faculty_name": "Vinoda V Baliga",
-    "sc_faculty_designation": "Lab. Supervisor",
-    "sc_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120010005.jpg"
-  },
-  {
-    "sc_faculty_name": "Dhanushree Kotian",
-    "sc_faculty_designation": "Lab Instructor",
-    "sc_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120170004.jpg"
+    "sc_faculty_name": "myadmin",
+    "sc_faculty_designation": "Admin"
   }
 ]

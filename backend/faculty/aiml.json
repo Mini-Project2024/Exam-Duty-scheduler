@@ -1,10 +1,5 @@
 [
   {
-    "aiml_faculty_name": "Dr. Basappa Kodada",
-    "aiml_faculty_designation": "Associate Professor & HOD",
-    "aiml_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120220016.jpg"
-  },
-  {
     "aiml_faculty_name": "Mrs. Kanmani",
     "aiml_faculty_designation": "Assistant Professor",
     "aiml_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120220036.jpg"
@@ -48,20 +43,5 @@
     "aiml_faculty_name": "Mr. Kiran Ankalakoti",
     "aiml_faculty_designation": "Assistant Professor",
     "aiml_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120240008.jpg"
-  },
-  {
-    "aiml_faculty_name": "Mrs. Sowmya D",
-    "aiml_faculty_designation": "Lab Instructor",
-    "aiml_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120220029.jpg"
-  },
-  {
-    "aiml_faculty_name": "Mrs. Geetha",
-    "aiml_faculty_designation": "Lab Instructor",
-    "aiml_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120230025.jpg"
-  },
-  {
-    "aiml_faculty_name": "Mr. Praveena T Damale",
-    "aiml_faculty_designation": "Foreman",
-    "aiml_faculty_pic": "https://www.canaraengineering.in/departments/faculty/0120240005.jpg"
   }
 ]

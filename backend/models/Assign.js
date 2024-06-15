@@ -1,28 +1,21 @@
 const mongoose = require('mongoose');
 
 const assignmentSchema = new mongoose.Schema({
-  date: {
-    type: String,
+  examDateId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ExamDate',
     required: true,
   },
-  faculty: {
-    type: String,
+  facultyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'examduty',
     required: true,
   },
-  session: {
-    type: String,
-    required: true,
-  },
-  semester: {
-    type: String,
-    required: true,
-  },
-  assignedAt: {
-    type: Date,
-    default: Date.now,
-  },
+  session: String,
+  semester: String,
+  subject: String,
 });
 
-const AssignmentModel = mongoose.model("Assignment", assignmentSchema);
+const AssignmentModel = mongoose.model('Assignment', assignmentSchema);
 
 module.exports = AssignmentModel;
