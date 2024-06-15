@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const cors = require("cors");
 const UserModel = require("./models/Users");
 const examDateModel = require("./models/ExamDate");
+const AssignmentModel = require("./models/Assign");
 const path=require('path');
 const fs = require('fs');
 require("dotenv").config();
