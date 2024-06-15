@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const cors = require("cors");
 const UserModel = require("./models/Users");
 const examDateModel = require("./models/ExamDate");
+const path=require('path');
+const fs = require('fs');
 require("dotenv").config();
 
 const app = express();
@@ -59,6 +61,30 @@ app.post("/addFaculty", async (req, res) => {
     console.error("Error adding faculty:", error);
     res.status(400).json({ message: "Error adding faculty member." });
   }
+});
+
+app.get('/api/faculty-files', (req, res) => {
+  const directoryPath = path.join(__dirname, 'backend/faculty');
+
+  fs.readdir(directoryPath, (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: 'Unable to scan directory' });
+    }
+
+    const fileDetails = files.map(file => {
+      const filePath = path.join(directoryPath, file);
+      const stats = fs.statSync(filePath);
+
+      return {
+        name: file,
+        size: stats.size,
+        createdAt: stats.birthtime,
+        modifiedAt: stats.mtime
+      };
+    });
+
+    res.json(fileDetails);
+  });
 });
 
 //fetch faculty

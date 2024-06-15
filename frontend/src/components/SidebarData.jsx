@@ -3,6 +3,7 @@ import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurned
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import WorkHistoryIcon from '@mui/icons-material/WorkHistory';
 
 export const SidebarData = [
     {
@@ -24,5 +25,6 @@ export const SidebarData = [
         title: "Add Exam Dates",
         icon: <EventAvailableIcon/>,
         link: "/main/examDates"
-    }
+    },
+   
 ];
