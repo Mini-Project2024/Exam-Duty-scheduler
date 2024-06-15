@@ -5,6 +5,7 @@ const cors = require("cors");
 const UserModel = require("./models/Users");
 const examDateModel = require("./models/ExamDate");
 const path=require('path');
+
 const fs = require('fs');
 require("dotenv").config();
 
@@ -63,29 +64,38 @@ app.post("/addFaculty", async (req, res) => {
   }
 });
 
+
+// fetch faculty names based on department from JSON files
 app.get('/api/faculty-files', (req, res) => {
-  const directoryPath = path.join(__dirname, 'backend/faculty');
+  const { department } = req.query;
 
-  fs.readdir(directoryPath, (err, files) => {
-    if (err) {
-      return res.status(500).json({ error: 'Unable to scan directory' });
-    }
+  if (!department) {
+    return res.status(400).json({ error: 'Department parameter is required' });
+  }
 
-    const fileDetails = files.map(file => {
-      const filePath = path.join(directoryPath, file);
-      const stats = fs.statSync(filePath);
+  const filename = `${department}.json`;
+  const filePath = path.join(__dirname, 'faculty', filename);
 
-      return {
-        name: file,
-        size: stats.size,
-        createdAt: stats.birthtime,
-        modifiedAt: stats.mtime
-      };
-    });
+  try {
+    // Read the JSON file
+    const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
-    res.json(fileDetails);
-  });
+    // Extract faculty names and designations from the JSON content
+    const facultyNameKey = `${department}_faculty_name`;
+    const facultyDesignationKey = `${department}_faculty_designation`;
+
+    const facultyName = content.map(item => ({
+      name: item[facultyNameKey],
+      }));
+
+    res.json(facultyName);
+  } catch (error) {
+    console.error(`Error reading file ${filename}:`, error);
+    res.status(500).json({ error: 'Error fetching faculty data' });
+  }
 });
+
+
 
 //fetch faculty
 app.get("/faculty", async (req, res) => {
