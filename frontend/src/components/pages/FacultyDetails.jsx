@@ -39,10 +39,15 @@ const FacultyDetails = () => {
 
   const fetchAssignedDutyData = async (facultyName) => {
     try {
-      const response = await axios.get(`http://localhost:3106/assignedFaculty?name=${facultyName}`);
-      let assignedDutyData = response.data;
-      assignedDutyData=assignedDutyData.sort((a, b) => a.semester - b.semester);
-      setAssignedDuty(assignedDutyData);
+      const response = await axios.get("http://localhost:3106/assignedFaculty");
+      const assignedDutyData = response.data;
+
+      // Filter duties for the selected faculty and sort by semester
+      const filteredAndSortedDuties = assignedDutyData
+        .filter(duty => duty.faculty === facultyName)
+        .sort((a, b) => a.semester - b.semester);
+
+      setAssignedDuty(filteredAndSortedDuties);
     } catch (error) {
       console.error("Error fetching assigned duty data", error);
     }

@@ -9,52 +9,53 @@ const AssignDuty = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const facultyResponse = await axios.get(
-          "http://localhost:3106/faculty"
-        );
+        const [facultyResponse, datesResponse, assignedResponse] = await Promise.all([
+          axios.get("http://localhost:3106/faculty"),
+          axios.get("http://localhost:3106/getExamDetails"),
+          axios.get("http://localhost:3106/assignedFaculty")
+        ]);
 
-        const filteredFacultyList = facultyResponse.data.filter(
-          (faculty) => faculty.name.toLowerCase() !== "myadmin"
-        );
-        setFacultyList(filteredFacultyList);
+        console.log('Faculty Response:', facultyResponse.data);
+        console.log('Dates Response:', datesResponse.data);
+        // console.log('Assigned Response:', assignedResponse.data);
 
-        const datesResponse = await axios.get(
-          "http://localhost:3106/getExamDetails"
-        );
-        const examDetails = datesResponse.data.map((exam) => ({
-          date: exam.examDate,
-          subject: exam.examName,
-          semester: exam.semester,
-          session: exam.session,
-          assignedFaculty: "",
-          assigned: false,
-        }));
+        const facultyData = facultyResponse.data.filter(faculty => faculty.name.toLowerCase() !== "myadmin");
+        setFacultyList(facultyData);
 
-        const assignedResponse = await axios.get(
-          "http://localhost:3106/assignedFaculty"
-        );
         const assignedFaculty = assignedResponse.data;
 
-        const updatedDates = examDetails.map((dateObj) => {
-          const assignment = assignedFaculty.find(
-            (assign) =>
-              new Date(assign.date).toISOString() ===
-              new Date(dateObj.date).toISOString()
-          );
+        const examDetails = datesResponse.data.map(exam => {
+          const assignment = assignedFaculty.find(assign => assign.examDateId._id === exam._id && assign.session === exam.session);
+          console.log(assignment)
           if (assignment) {
+           
+            const faculty = facultyData.find(faculty => faculty._id === assignment.facultyId);
             return {
-              ...dateObj,
+              _id: exam._id,
+              date: exam.examDate,
+              subject: exam.examName,
+              semester: exam.semester,
+              session: exam.session,
+              assignedFaculty: assignment.facultyId._id,
+              assignedFacultyName: faculty ? faculty.name : "",
               assigned: true,
-              assignedFaculty: assignment.faculty,
             };
           }
-          return dateObj;
+          return {
+           
+            _id: exam._id,
+            date: exam.examDate,
+            subject: exam.examName,
+            semester: exam.semester,
+            session: exam.session,
+            assignedFaculty: "",
+            assigned: false,
+          };
         });
 
-        // Sort the dates by semester in ascending order
-        updatedDates.sort((a, b) => b.semester - a.semester);
+        examDetails.sort((a, b) => b.semester - a.semester);
 
-        setDates(updatedDates);
+        setDates(examDetails);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -65,7 +66,9 @@ const AssignDuty = () => {
 
   const handleFacultyChange = (event, dateIndex) => {
     const updatedDates = [...dates];
-    updatedDates[dateIndex].assignedFaculty = event.target.value;
+    const selectedFaculty = facultyList.find(faculty => faculty._id === event.target.value);
+    updatedDates[dateIndex].assignedFaculty = selectedFaculty._id;
+    updatedDates[dateIndex].assignedFacultyName = selectedFaculty.name;
     setDates(updatedDates);
   };
 
@@ -78,19 +81,19 @@ const AssignDuty = () => {
     }
 
     const updatedDates = [...dates];
-    updatedDates[dateIndex].assigned = true;
-    setDates(updatedDates);
 
     try {
-      const response = await axios.post("http://localhost:3106/assignDuty", {
-        date: updatedDates[dateIndex].date,
-        faculty: selectedFacultyForDate,
+      await axios.post("http://localhost:3106/assignDuty", {
+        examDateId: updatedDates[dateIndex]._id,
+        facultyId: selectedFacultyForDate,
         session: updatedDates[dateIndex].session,
         semester: updatedDates[dateIndex].semester,
+        subject: updatedDates[dateIndex].subject,
       });
 
+      updatedDates[dateIndex].assigned = true;
+      setDates(updatedDates);
       toast.success("Duty assigned successfully");
-      console.log("Assignment saved:", response.data);
     } catch (error) {
       console.error("Error assigning duty:", error);
       toast.error("Error assigning duty");
@@ -117,7 +120,7 @@ const AssignDuty = () => {
           {dates.map((dateObj, index) => (
             <tr key={index}>
               <td className="px-4 py-2 border border-gray-300 text-center">
-                {new Date(dateObj.date).toLocaleDateString('en-US',{
+                {new Date(dateObj.date).toLocaleDateString('en-US', {
                   day: 'numeric',
                   month: 'long',
                   year: 'numeric',
@@ -134,14 +137,15 @@ const AssignDuty = () => {
               </td>
               <td className="px-4 py-2 border border-gray-300 text-center">
                 <select
-                  id={`faculty-${index}`}
-                  value={dateObj.assignedFaculty}
-                  onChange={(event) => handleFacultyChange(event, index)}
-                  disabled={dateObj.assigned}
+                   id={`faculty-${index}`}
+                   value={dateObj.assignedFaculty}
+                   onChange={(event) => handleFacultyChange(event, index)}
+                   disabled={dateObj.assigned}
                 >
                   <option value="">-- Select Faculty --</option>
-                  {facultyList.map((faculty) => (
-                    <option key={faculty._id} value={faculty.name}>
+                  
+                  {facultyList.map(faculty => (
+                    <option key={faculty._id} value={faculty._id}>
                       {faculty.name}
                     </option>
                   ))}
@@ -152,12 +156,12 @@ const AssignDuty = () => {
                   className={`text-${
                     dateObj.assigned ? "blue" : "gray"
                   }-500 ${
-                    dateObj.assigned? "bg-[#4bb543]" : "bg-[#3572EF]"
+                    dateObj.assigned ? "bg-[#4bb543]" : "bg-[#3572EF]"
                   } border-white text-white font-bold rounded-md px-4 py-2 w-24`}
                   onClick={() => handleAssign(index)}
                   disabled={!dateObj.assignedFaculty || dateObj.assigned}
                 >
-                  {dateObj.assigned ? "Assigned" : "Assign"}
+                  {dateObj.assigned ? `Assigned ` : "Assign"}
                 </button>
               </td>
             </tr>

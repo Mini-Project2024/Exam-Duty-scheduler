@@ -24,10 +24,20 @@ const AddExamDetails = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:3106/addExamdate",
-        examDetails
-      );
+      const existingExam = await axios.get(`http://localhost:3106/checkExamDate`, {
+        params: {
+          examDate: examDetails.examDate,
+          semester: examDetails.semester,
+          session: examDetails.session,
+        },
+      });
+  
+      if (existingExam.data && existingExam.data.examName !== examDetails.examName) {
+        toast.error("Exam already exists on this date, semester, and session.");
+        return;
+      }
+  
+      const response = await axios.post("http://localhost:3106/addExamdate", examDetails);
       console.log("Exam details added:", response.data);
       toast.success("Exam details added successfully!");
       setTimeout(() => {
