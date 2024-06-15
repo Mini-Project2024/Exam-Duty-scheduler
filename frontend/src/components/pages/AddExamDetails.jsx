@@ -24,19 +24,19 @@ const AddExamDetails = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const existingExam = await axios.get(`http://localhost:3106/checkExamDate`, {
+      const existingExam = await axios.get("http://localhost:3106/checkExamDate", {
         params: {
           examDate: examDetails.examDate,
           semester: examDetails.semester,
           session: examDetails.session,
         },
       });
-  
+
       if (existingExam.data && existingExam.data.examName !== examDetails.examName) {
         toast.error("Exam already exists on this date, semester, and session.");
         return;
       }
-  
+
       const response = await axios.post("http://localhost:3106/addExamdate", examDetails);
       console.log("Exam details added:", response.data);
       toast.success("Exam details added successfully!");
@@ -58,7 +58,7 @@ const AddExamDetails = () => {
 
   const fetchExamData = async () => {
     try {
-      const response = await axios.get("http://localhost:3106/getExamDetails"); // Change the endpoint to the correct one
+      const response = await axios.get("http://localhost:3106/getExamDetails");
       setExamData(response.data);
     } catch (error) {
       console.error("Error fetching exam data:", error);
@@ -144,7 +144,7 @@ const AddExamDetails = () => {
               value={examDetails.examDate}
               onChange={handleChange}
               required
-              min={new Date().toISOString().split('T')[0]} 
+              min={new Date().toISOString().split('T')[0]}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
             />
           </div>
