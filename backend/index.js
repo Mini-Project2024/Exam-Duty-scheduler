@@ -135,17 +135,26 @@ app.get("/faculty", async (req, res) => {
 app.delete("/deleteFaculty/:id", async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Delete the faculty member
     await UserModel.findByIdAndDelete(id);
-    res
-      .status(200)
-      .json({ success: true, message: "Faculty member deleted successfully." });
+
+    // Delete assignments associated with this faculty
+    await AssignmentModel.deleteMany({ facultyId: id });
+
+    res.status(200).json({
+      success: true,
+      message: "Faculty member and associated assignments deleted successfully.",
+    });
   } catch (error) {
     console.error("Error deleting faculty member:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Error deleting faculty member." });
+    res.status(500).json({
+      success: false,
+      message: "Error deleting faculty member and associated assignments.",
+    });
   }
 });
+
 
 // Update faculty member
 app.put("/updateFaculty/:id", async (req, res) => {
