@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useUser } from './UserContext'; // Import the context
 
 const UserDetails = () => {
-  const { user } = useUser(); // Destructure the user object from the context
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,13 +9,14 @@ const UserDetails = () => {
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
-        if (!user || !user.token) {
-          throw new Error('No user found or not logged in');
+        const token = localStorage.getItem('token'); // Retrieve token from localStorage
+        if (!token) {
+          throw new Error('No token found');
         }
 
-        const response = await axios.get(`http://localhost:3106/assignedFaculty/me`, {
+        const response = await axios.get('http://localhost:3106/assignedFaculty/me', {
           headers: {
-            Authorization: `Bearer ${user.token}` // Include token in the Authorization header
+            Authorization: `Bearer ${token}` // Include token in the Authorization header
           }
         });
 
@@ -30,7 +29,7 @@ const UserDetails = () => {
     };
 
     fetchUserDetails();
-  }, [user]);
+  }, []);
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -39,17 +38,17 @@ const UserDetails = () => {
     <div className="container mx-auto px-4">
       <h1 className="text-2xl font-bold mb-4">My Duty Assignments</h1>
       {assignments.length === 0 ? (
-        <p>No duty assignments found.</p>
+        <p>No assignments found.</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white border border-gray-200">
             <thead>
               <tr>
                 <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Exam Date
+                  Exam Name
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Exam Name
+                  Exam Date
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Semester
@@ -65,13 +64,12 @@ const UserDetails = () => {
             <tbody>
               {assignments.map((assignment) => (
                 <tr key={assignment._id} className="bg-white">
-                   <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                    {assignment.examDateId.examDate}
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                     {assignment.examDateId.examName}
                   </td>
-                 
+                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                    {assignment.examDateId.examDate}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                     {assignment.examDateId.semester}
                   </td>
