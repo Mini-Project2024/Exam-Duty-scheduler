@@ -25,7 +25,7 @@ To install the Exam Duty Scheduler, follow these steps:
     ```
 2. cd to the folder
    ```bash
-    cd Exam-Duty-schduler
+    cd Exam-Duty-scheduler
    ```
 3. Open the terminal and split it and in one terminal open frontend folder
    ```bash
