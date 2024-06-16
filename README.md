@@ -25,7 +25,7 @@ To install the Exam Duty Scheduler, follow these steps:
     ```
 2. cd to the folder
    ```bash
-    cd Exam-Duty-schduler
+    cd Exam-Duty-scheduler
    ```
 3. Open the terminal and split it and in one terminal open frontend folder
    ```bash
@@ -43,7 +43,7 @@ To install the Exam Duty Scheduler, follow these steps:
    ```bash
     npm run dev
    ```
-6. In backend create a `.env' file and add the MongoDB url
+6. In backend create a `.env` file and add the MongoDB url
    ```
     MONGODB_URL = "YOUR_MONGODB_URL"
     PORT = 3106
@@ -57,7 +57,7 @@ To install the Exam Duty Scheduler, follow these steps:
    `Username` = myadmin
    
    `Password` = admin123
-10. The admin must assign the faculty username, email and password in the admin page
+10. The admin must assign the faculty username, designation, dept and password in the admin page
 11. After the admin has created the faculty-user they may login to faculty page
 12. Roles of admin:
     + Create the faculty account
