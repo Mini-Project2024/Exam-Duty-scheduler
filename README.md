@@ -83,5 +83,5 @@ Thank you for your hard work and dedication in making Exam-Duty-Scheduler a real
 
 For questions, suggestions, or feedback, please contact any of the members.
 
-<mark>Thank you for using CONNECTO! We hope this platform enhances your campus experience.</mark>
+<mark>Thank you for using Exam Duty Scheduler! We hope this platform enhances your user experience.</mark>
 
