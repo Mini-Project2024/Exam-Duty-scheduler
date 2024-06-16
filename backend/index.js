@@ -5,9 +5,9 @@ const cors = require("cors");
 const UserModel = require("./models/Users");
 const examDateModel = require("./models/ExamDate");
 const AssignmentModel = require("./models/Assign");
-const path = require("path");
-const fs = require("fs");
-const { isValidNumber } = require("face-api.js");
+// const path = require("path");
+// const fs = require("fs");
+// const { isValidNumber } = require("face-api.js");
 require("dotenv").config();
 
 const app = express();
@@ -322,6 +322,30 @@ app.post("/assignDuty", async (req, res) => {
 app.get("/assignedFaculty", async (req, res) => {
   try {
     const assignments = await AssignmentModel.find()
+      .populate({
+        path: "examDateId",
+        select: ["_id", "examDate", "examName", "semester", "session"],
+      })
+      .populate({
+        path: "facultyId",
+        select: ["_id", "name"],
+      });
+
+    res.status(200).json(assignments);
+  } catch (error) {
+    console.error("Error fetching assigned duty data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching assigned duty data",
+      error: error.message,
+    });
+  }
+});
+//fetch faculty details
+app.get("/assignedFaculty/:facultyName", async (req, res) => {
+  try {
+    const facultyName = req.params.facultyName;
+    const assignments = await AssignmentModel.find({ facultyName })
       .populate({
         path: "examDateId",
         select: ["_id", "examDate", "examName", "semester", "session"],
