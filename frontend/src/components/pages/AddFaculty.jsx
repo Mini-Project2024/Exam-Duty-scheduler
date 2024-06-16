@@ -181,6 +181,7 @@ const AddFaculty = () => {
               <th className="px-4 py-2 border border-gray-300">Name</th>
               <th className="px-4 py-2 border border-gray-300">Designation</th>
               <th className="px-4 py-2 border border-gray-300">Dept</th>
+              <th className="px-4 py-2 border border-gray-300">Password</th>
               <th className="px-4 py-2 border border-gray-300">Action</th>
             </tr>
             {facultyData.map((faculty) => (
@@ -188,6 +189,7 @@ const AddFaculty = () => {
                 <td className="px-4 py-2 border border-gray-300">{faculty.name}</td>
                 <td className="px-4 py-2 border border-gray-300">{faculty.designation}</td>
                 <td className="px-4 py-2 border border-gray-300">{faculty.dept}</td>
+                <td className="px-4 py-2 border border-gray-300">{faculty.password}</td>
                 <td className="px-4 py-2 border border-gray-300">
                   <button
                     className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300"
