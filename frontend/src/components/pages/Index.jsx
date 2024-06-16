@@ -2,36 +2,35 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast, { Toaster } from 'react-hot-toast';
-import "../css/Index.css"
+import { useUser } from './UserContext'; // Import the context
+import "../css/Index.css";
 import logo from "../../images/logo.png";
 
 function Index() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { login } = useUser(); // Destructure the login function from the context
 
   const handleSubmit = async (e) => {
-    
     e.preventDefault();
-    // navigate('/main');
-    
-    try {
 
-      // Send login request to backend
+    try {
       const response = await axios.post('http://localhost:3106/login', { username, password });
-      
-      // Check if the login was successful
+
       if (response.data.success) {
-        if(username === "myadmin" && password === "admin123"){
-          toast.success("User logged in successfully");
+        login({ username, token: response.data.token }); // Store user information in context
+
+        if (username === "myadmin" && password === "admin123") {
+          toast.success("Admin logged in successfully");
           setTimeout(() => {
             navigate('/main');
           }, 1000);
         } else {
+          toast.success("User logged in successfully");
           navigate('/users');
         }
       } else {
-        // Handle failed login (user not found or invalid credentials)
         toast.error('User not found or invalid credentials');
       }
     } catch (error) {
@@ -42,7 +41,6 @@ function Index() {
 
   return (
     <div className="flex flex-row min-h-screen bg-[#3572EF] text-white">
-      {/* Left side */}
       <div className="flex flex-col justify-center w-1/2 p-8 bg-white text-black">
         <img src={logo} className='w-28 absolute top-3 left-3' alt="logo" />
         <h1 className="text-5xl font-bold mb-4">CANARA DUTY SCHEDULER</h1>
@@ -51,10 +49,8 @@ function Index() {
         </p>
       </div>
 
-      {/* Wavy border */}
       <div className="wavy-border"></div>
 
-      {/* Right side */}
       <div className="flex flex-col justify-center items-center w-1/2 p-8 max-w-sm mx-auto">
         <Toaster />
         <h1 className="text-4xl font-bold mb-6">Login</h1>

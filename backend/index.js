@@ -5,6 +5,9 @@ const cors = require("cors");
 const UserModel = require("./models/Users");
 const examDateModel = require("./models/ExamDate");
 const AssignmentModel = require("./models/Assign");
+const jwt = require('jsonwebtoken');
+const passport = require('./passport.config.js');
+
 // const path = require("path");
 // const fs = require("fs");
 // const { isValidNumber } = require("face-api.js");
@@ -48,36 +51,48 @@ function decrypt(encryptedMessage, encryptionMethod, secret, iv){
 
 
 // Login route
+ // Adjust path as per your project structure
+
+// Import the Token model
+
+
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
-
+  
   try {
     // Find user by username
     const user = await UserModel.findOne({ name: username });
 
     // Check if user exists
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     // Compare passwords
     const isMatch = password === decrypt(user.password, encryptionMethod, key, iv);
 
     if (!isMatch) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
-    // User authenticated successfully
-    res.status(200).json({ success: true, message: "Login successful" });
+    // User authenticated successfully, generate JWT
+    const payload = { id: user._id };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // Store the token in the user's document
+    user.token = token;
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Login successful", token });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
+
+
+
+    
 
 // API routes
 
@@ -342,10 +357,14 @@ app.get("/assignedFaculty", async (req, res) => {
   }
 });
 //fetch faculty details
-app.get("/assignedFaculty/:facultyName", async (req, res) => {
+app.get("/assignedFaculty/me", passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
-    const facultyName = req.params.facultyName;
-    const assignments = await AssignmentModel.find({ facultyName })
+    if (!req.user) {
+      throw new Error('User not authenticated');
+    }
+    const facultyName = req.user.name; // Get the username from the authenticated user
+    // console.log("Authenticated user:", req.user); // Add this line for debugging
+    const assignments = await AssignmentModel.find({ facultyName: facultyName })
       .populate({
         path: "examDateId",
         select: ["_id", "examDate", "examName", "semester", "session"],
@@ -365,6 +384,19 @@ app.get("/assignedFaculty/:facultyName", async (req, res) => {
     });
   }
 });
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  res.status(500).json({
+    success: false,
+    message: "Internal Server Error",
+    error: err.message,
+  });
+});
+
+
+
 
 
 // Logout feature

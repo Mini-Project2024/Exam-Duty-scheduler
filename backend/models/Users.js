@@ -17,6 +17,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  token:{
+    type:String,
+    required:true,
+  },
   assignments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Assignment" }],
 });
 
