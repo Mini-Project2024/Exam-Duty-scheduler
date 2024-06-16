@@ -5,9 +5,9 @@ const cors = require("cors");
 const UserModel = require("./models/Users");
 const examDateModel = require("./models/ExamDate");
 const AssignmentModel = require("./models/Assign");
-const path = require("path");
-const fs = require("fs");
-const { isValidNumber } = require("face-api.js");
+// const path = require("path");
+// const fs = require("fs");
+// const { isValidNumber } = require("face-api.js");
 require("dotenv").config();
 
 const app = express();
@@ -160,9 +160,9 @@ app.delete("/deleteFaculty/:id", async (req, res) => {
 app.put("/updateFaculty/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, password, dept } = req.body;
+    const { name, designation, password, dept } = req.body;
 
-    let updatedData = { name, email, dept };
+    let updatedData = { name, designation, dept };
 
     if (password) {
       const encryptedPassword = encrypt(password);
