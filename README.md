@@ -57,7 +57,7 @@ To install the Exam Duty Scheduler, follow these steps:
    `Username` = myadmin
    
    `Password` = admin123
-10. The admin must assign the faculty username, email and password in the admin page
+10. The admin must assign the faculty username, designation, dept and password in the admin page
 11. After the admin has created the faculty-user they may login to faculty page
 12. Roles of admin:
     + Create the faculty account
