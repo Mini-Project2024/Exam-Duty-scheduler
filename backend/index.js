@@ -295,11 +295,12 @@ app.put("/updateExamDate/:id", async (req, res) => {
 // Assign duty
 app.post("/assignDuty", async (req, res) => {
   try {
-    const { examDateId, facultyId, session, semester, subject } = req.body;
+    const { examDateId, facultyId, facultyName, session, semester, subject } = req.body;
 
     const newAssignment = new AssignmentModel({
       examDateId,
       facultyId,
+      facultyName,
       session,
       semester,
       subject,
@@ -313,12 +314,20 @@ app.post("/assignDuty", async (req, res) => {
   }
 });
 
+
 // Fetch assigned data
 app.get("/assignedFaculty", async (req, res) => {
   try {
     const assignments = await AssignmentModel.find()
-      .populate("examDateId")
-      .populate("facultyId");
+      .populate({
+        path: "examDateId",
+        select: ["_id", "examDate", "examName", "semester", "session"],
+      })
+      .populate({
+        path: "facultyId",
+        select: ["_id", "name"],
+      });
+
     res.status(200).json(assignments);
   } catch (error) {
     console.error("Error fetching assigned duty data:", error);
@@ -329,6 +338,7 @@ app.get("/assignedFaculty", async (req, res) => {
     });
   }
 });
+
 
 // Logout feature
 app.post("/logout", (req, res) => {

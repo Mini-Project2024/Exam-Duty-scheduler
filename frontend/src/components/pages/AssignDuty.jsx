@@ -8,46 +8,45 @@ const AssignDuty = () => {
 
   const fetchData = async () => {
     try {
-      const [facultyResponse, datesResponse, assignedResponse] = await Promise.all([
-        axios.get("http://localhost:3106/faculty"),
-        axios.get("http://localhost:3106/getExamDetails"),
-        axios.get("http://localhost:3106/assignedFaculty")
-      ]);
+      const [facultyResponse, datesResponse, assignedResponse] =
+        await Promise.all([
+          axios.get("http://localhost:3106/faculty"),
+          axios.get("http://localhost:3106/getExamDetails"),
+          axios.get("http://localhost:3106/assignedFaculty"),
+        ]);
 
-      // console.log('Faculty Response:', facultyResponse.data);
-      // console.log('Dates Response:', datesResponse.data);
-      console.log('Assigned Response:', assignedResponse);
-
-      const facultyData = facultyResponse.data.filter(faculty => faculty.name.toLowerCase() !== "myadmin");
+      const facultyData = facultyResponse.data.filter(
+        (faculty) => faculty.name.toLowerCase() !== "myadmin"
+      );
       setFacultyList(facultyData);
 
       const assignedFaculty = assignedResponse.data;
 
-      const examDetails = datesResponse.data.map(exam => {
-        const assignment = assignedFaculty.find(assign => assign.examDateId && assign.examDateId._id === exam._id && assign.session === exam.session);
-        console.log(assignment);
+      const examDetails = datesResponse.data.map((exam) => {
+        const assignment = assignedFaculty.find(
+          (assign) =>
+            assign.examDateId &&
+            assign.examDateId._id === exam._id &&
+            assign.session === exam.session
+        );
+
         if (assignment) {
-          const faculty = facultyData.find(faculty => faculty._id === assignment.facultyId);
+          const faculty = facultyData.find(
+            (faculty) => faculty._id === assignment.facultyId._id
+          );
           return {
-            _id: exam._id,
-            date: exam.examDate,
-            subject: exam.examName,
-            semester: exam.semester,
-            session: exam.session,
-            assignedFaculty: assignment.facultyId,
+            ...exam,
+            assignedFaculty: assignment.facultyId._id,
             assignedFacultyName: faculty ? faculty.name : "",
             assigned: true,
           };
+        } else {
+          return {
+            ...exam,
+            assignedFaculty: "",
+            assigned: false,
+          };
         }
-        return {
-          _id: exam._id,
-          date: exam.examDate,
-          subject: exam.examName,
-          semester: exam.semester,
-          session: exam.session,
-          assignedFaculty: "",
-          assigned: false,
-        };
       });
 
       examDetails.sort((a, b) => b.semester - a.semester);
@@ -55,6 +54,7 @@ const AssignDuty = () => {
       setDates(examDetails);
     } catch (error) {
       console.error("Error fetching data:", error);
+      toast.error("Failed to fetch data");
     }
   };
 
@@ -64,7 +64,9 @@ const AssignDuty = () => {
 
   const handleFacultyChange = (event, dateIndex) => {
     const updatedDates = [...dates];
-    const selectedFaculty = facultyList.find(faculty => faculty._id === event.target.value);
+    const selectedFaculty = facultyList.find(
+      (faculty) => faculty._id === event.target.value
+    );
     updatedDates[dateIndex].assignedFaculty = selectedFaculty._id;
     updatedDates[dateIndex].assignedFacultyName = selectedFaculty.name;
     setDates(updatedDates);
@@ -79,14 +81,16 @@ const AssignDuty = () => {
     }
 
     const updatedDates = [...dates];
+    const assignedFacultyName = updatedDates[dateIndex].assignedFacultyName;
 
     try {
       await axios.post("http://localhost:3106/assignDuty", {
         examDateId: updatedDates[dateIndex]._id,
         facultyId: selectedFacultyForDate,
+        facultyName: assignedFacultyName,
         session: updatedDates[dateIndex].session,
         semester: updatedDates[dateIndex].semester,
-        subject: updatedDates[dateIndex].subject,
+        subject: updatedDates[dateIndex].examName, // Assuming examName is the subject field
       });
 
       updatedDates[dateIndex].assigned = true;
@@ -118,14 +122,14 @@ const AssignDuty = () => {
           {dates.map((dateObj, index) => (
             <tr key={index}>
               <td className="px-4 py-2 border border-gray-300 text-center">
-                {new Date(dateObj.date).toLocaleDateString('en-US', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
+                {new Date(dateObj.examDate).toLocaleDateString("en-US", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
                 })}
               </td>
               <td className="px-4 py-2 border border-gray-300 text-center">
-                {dateObj.subject}
+                {dateObj.examName}
               </td>
               <td className="px-4 py-2 border border-gray-300 text-center">
                 {dateObj.semester}
@@ -140,17 +144,27 @@ const AssignDuty = () => {
                   onChange={(event) => handleFacultyChange(event, index)}
                   disabled={dateObj.assigned}
                 >
-                  <option value="">-- Select Faculty --</option>
-                  {facultyList.map(faculty => (
-                    <option key={faculty._id} value={faculty._id}>
-                      {faculty.name}
+                  {!dateObj.assigned ? (
+                    <>
+                      <option value="">-- Select Faculty --</option>
+                      {facultyList.map((faculty) => (
+                        <option key={faculty._id} value={faculty._id}>
+                          {faculty.name}
+                        </option>
+                      ))}
+                    </>
+                  ) : (
+                    <option value={dateObj.assignedFaculty} disabled>
+                      {dateObj.assignedFacultyName}
                     </option>
-                  ))}
+                  )}
                 </select>
               </td>
               <td className="px-4 py-2 border border-gray-300 text-center">
                 <button
-                  className={`text-${dateObj.assigned ? "blue" : "gray"}-500 ${dateObj.assigned ? "bg-[#4bb543]" : "bg-[#3572EF]"} border-white text-white font-bold rounded-md px-4 py-2 w-24`}
+                  className={`text-${dateObj.assigned ? "blue" : "gray"}-500 ${
+                    dateObj.assigned ? "bg-[#4bb543]" : "bg-[#3572EF]"
+                  } border-white text-white font-bold rounded-md px-4 py-2 w-24`}
                   onClick={() => handleAssign(index)}
                   disabled={!dateObj.assignedFaculty || dateObj.assigned}
                 >
