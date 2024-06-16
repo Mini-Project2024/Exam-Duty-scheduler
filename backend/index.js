@@ -341,6 +341,30 @@ app.get("/assignedFaculty", async (req, res) => {
     });
   }
 });
+//fetch faculty details
+app.get("/assignedFaculty/:facultyName", async (req, res) => {
+  try {
+    const facultyName = req.params.facultyName;
+    const assignments = await AssignmentModel.find({ facultyName })
+      .populate({
+        path: "examDateId",
+        select: ["_id", "examDate", "examName", "semester", "session"],
+      })
+      .populate({
+        path: "facultyId",
+        select: ["_id", "name"],
+      });
+
+    res.status(200).json(assignments);
+  } catch (error) {
+    console.error("Error fetching assigned duty data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching assigned duty data",
+      error: error.message,
+    });
+  }
+});
 
 
 // Logout feature

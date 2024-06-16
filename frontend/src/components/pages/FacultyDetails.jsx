@@ -39,15 +39,10 @@ const FacultyDetails = () => {
 
   const fetchAssignedDutyData = async (facultyName) => {
     try {
-      const response = await axios.get("http://localhost:3106/assignedFaculty");
+      const response = await axios.get(`http://localhost:3106/assignedFaculty/${facultyName}`);
       const assignedDutyData = response.data;
-
-      // Filter duties for the selected faculty and sort by semester
-      const filteredAndSortedDuties = assignedDutyData
-        .filter(duty => duty.faculty === facultyName)
-        .sort((a, b) => a.semester - b.semester);
-
-      setAssignedDuty(filteredAndSortedDuties);
+  
+      setAssignedDuty(assignedDutyData);
     } catch (error) {
       console.error("Error fetching assigned duty data", error);
     }
@@ -71,7 +66,7 @@ const FacultyDetails = () => {
 
   return (
     <div className="faculty-details w-full">
-      <h1 className="text-2xl font-bold mb-4 w-full">Faculty Details</h1>
+      <center><h1 className="text-2xl font-bold my-4 w-full ">Faculty Details</h1></center>
       <div className='flex justify-center gap-8'>
         <div className="department-select mb-4">
           <select
@@ -107,20 +102,20 @@ const FacultyDetails = () => {
       </div>
       {selectedDepartment && selectedFaculty && assignedDuty.length > 0 && (
         <center>
-          <table className='border-2 border-gray-900 rounded'>
+          <table className='table-auto w-1/2 my-4'>
             <thead>
               <tr>
-                <th className='p-5 border-2 border-gray-900 rounded'>Semester</th>
-                <th className='p-5 border-2 border-gray-900 rounded'>Exam Date</th>
-                <th className='p-5 border-2 border-gray-900 rounded'>Session</th>
+                <th className='px-4 py-2 border border-gray-300'>Semester</th>
+                <th className='px-4 py-2 border border-gray-300'>Exam Date</th>
+                <th className='px-4 py-2 border border-gray-300'>Session</th>
               </tr>
             </thead>
             <tbody>
               {assignedDuty.map((entry, index) => (
                 <tr key={index}>
-                  <td className='p-5 border-2 border-gray-900 rounded'>{entry.semester}</td>
-                  <td className='p-5 border-2 border-gray-900 rounded'>{entry.date}</td>
-                  <td className='p-5 border-2 border-gray-900 rounded'>{entry.session}</td>
+                  <td className='px-4 py-2 border border-gray-300 text-center'>{entry.examDateId.semester}</td>
+                  <td className='px-4 py-2 border border-gray-300 text-center'>{entry.examDateId.examDate}</td>
+                  <td className='px-4 py-2 border border-gray-300 text-center'>{entry.examDateId.session}</td>
                 </tr>
               ))}
             </tbody>

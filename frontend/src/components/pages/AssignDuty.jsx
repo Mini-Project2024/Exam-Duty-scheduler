@@ -80,6 +80,22 @@ const AssignDuty = () => {
       return;
     }
 
+    const isAlreadyAssigned = dates.some((date, index) => {
+      if (index !== dateIndex) {
+        return (
+          date.assignedFaculty === selectedFacultyForDate &&
+          date.examDate === dates[dateIndex].examDate &&
+          date.session === dates[dateIndex].session
+        );
+      }
+      return false;
+    });
+  
+    if (isAlreadyAssigned) {
+      toast.error("Faculty is already assigned to this date and session.");
+      return;
+    }
+    
     const updatedDates = [...dates];
     const assignedFacultyName = updatedDates[dateIndex].assignedFacultyName;
 
