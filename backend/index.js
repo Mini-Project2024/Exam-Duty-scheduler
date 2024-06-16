@@ -243,6 +243,9 @@ app.delete("/deleteExamDate/:id", async (req, res) => {
   try {
     const { id } = req.params;
     await examDateModel.findByIdAndDelete(id);
+
+    // Delete assignments associated with this exam date
+    await AssignmentModel.deleteMany({ examDateId: id });
     res
       .status(200)
       .json({ success: true, message: "Exam details deleted successfully." });
