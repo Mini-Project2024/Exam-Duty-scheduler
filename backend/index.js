@@ -385,6 +385,78 @@ app.get("/assignedFaculty/me", passport.authenticate('jwt', { session: false }),
   }
 });
 
+
+
+// Exchange duty route
+app.get("/exchangeDuty", passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    if (!req.user) {
+      throw new Error('User not authenticated');
+    }
+    const facultyName = req.user.name; // Get the username from the authenticated user
+    // console.log("Authenticated user:", req.user); // Add this line for debugging
+    const assignments = await AssignmentModel.find({ facultyName: facultyName })
+      .populate({
+        path: "examDateId",
+        select: ["_id", "examDate", "examName", "semester", "session"],
+      })
+      .populate({
+        path: "facultyId",
+        select: ["_id", "name"],
+      });
+
+    res.status(200).json(assignments);
+  } catch (error) {
+    console.error("Error fetching assigned duty data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching assigned duty data",
+      error: error.message,
+    });
+  }
+});
+
+// POST endpoint for handling duty exchange request
+app.post("/requestExchange/:id", passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    // Ensure user is authenticated
+    if (!req.user) {
+      throw new Error('User not authenticated');
+    }
+
+    const { id } = req.params; // Assignment ID
+    const { exchangeDateId, exchangeFacultyId, exchangeSession } = req.body;
+
+    // Find the assignment by ID
+    const assignment = await AssignmentModel.findById(id);
+    if (!assignment) {
+      return res.status(404).json({ success: false, message: "Assignment not found" });
+    }
+
+    // Fetch details of the original assignment
+    const originalExamDateId = assignment.examDateId;
+    const originalFacultyId = assignment.facultyId;
+    const originalSession = assignment.session;
+
+    // Update the assignment with exchanged details
+    assignment.examDateId = exchangeDateId;
+    assignment.facultyId = exchangeFacultyId;
+    assignment.session = exchangeSession;
+
+    // Save the updated assignment
+    await assignment.save();
+
+    res.status(200).json({ success: true, message: "Duty exchange successful", assignment });
+  } catch (error) {
+    console.error("Error exchanging duty:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error exchanging duty",
+      error: error.message,
+    });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
@@ -394,7 +466,6 @@ app.use((err, req, res, next) => {
     error: err.message,
   });
 });
-
 
 
 
