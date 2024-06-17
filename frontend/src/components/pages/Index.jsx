@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import toast, { Toaster } from "react-hot-toast";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 import "../css/Index.css";
 import logo from "../../images/logo.png";
 
@@ -12,7 +12,6 @@ function Index() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // navigate('/main');
 
     try {
       // Send login request to backend
@@ -23,14 +22,18 @@ function Index() {
 
       // Check if the login was successful
       if (response.data.success) {
-        if (username === "myadmin" && password === "admin123") {
-          toast.success("User logged in successfully");
-          setTimeout(() => {
-            navigate("/main");
-          }, 1000);
-        } else {
-          navigate("/users");
-        }
+        // Store token in localStorage
+        localStorage.setItem('token', response.data.token);
+        
+        toast.success("User logged in successfully");
+        
+        setTimeout(() => {
+          if (username === "myadmin" && password === "admin123") {
+            navigate('/main');
+          } else {
+            navigate('/users');
+          }
+        }, 1000);
       } else {
         // Handle failed login (user not found or invalid credentials)
         toast.error("User not found or invalid credentials");

@@ -6,7 +6,9 @@ import MainContent from './MainContent';
 import { Toaster } from 'react-hot-toast';
 function User() {
   return (
+    
     <div className='flex flex-col h-screen'>
+
        <Header/>
       
       <div className="flex flex-1">
