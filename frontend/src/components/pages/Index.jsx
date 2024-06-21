@@ -6,8 +6,8 @@ import "../css/Index.css";
 import logo from "../../images/logo.png";
 
 function Index() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -15,8 +15,11 @@ function Index() {
 
     try {
       // Send login request to backend
-      const response = await axios.post('http://localhost:3106/login', { username, password });
-      
+      const response = await axios.post("http://localhost:3106/login", {
+        username,
+        password,
+      });
+
       // Check if the login was successful
       if (response.data.success) {
         // Store token in localStorage
@@ -33,23 +36,29 @@ function Index() {
         }, 1000);
       } else {
         // Handle failed login (user not found or invalid credentials)
-        toast.error('User not found or invalid credentials');
+        toast.error("User not found or invalid credentials");
       }
     } catch (error) {
-      console.error('Error during login:', error);
-      toast.error('Error during login');
+      console.error("Error during login:", error);
+      toast.error("Error during login");
     }
   };
 
   return (
     <div className="flex flex-row min-h-screen bg-[#3572EF] text-white">
       {/* Left side */}
-      <div className="flex flex-col justify-center w-1/2 p-8 bg-white text-black">
-        <img src={logo} className='w-28 absolute top-3 left-3' alt="logo" />
-        <h1 className="text-5xl font-bold mb-4">CANARA DUTY SCHEDULER</h1>
-        <p className="text-xl text-center max-w-md">
-          Welcome to the Canara Duty Scheduler. Please login to continue.
-        </p>
+      <div className="flex flex-col justify-center items-center w-1/2 p-8 bg-white text-black  shadow-lg">
+        <img src={logo} className="w-28 absolute top-3 left-3" alt="logo" />
+        <div className="text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            CANARA DUTY SCHEDULER
+          </h1>
+          <p className="text-lg md:text-xl text-left max-w-md">
+            Welcome to the Canara Duty Scheduler.
+            <br />
+            Please login to continue.
+          </p>
+        </div>
       </div>
 
       {/* Wavy border */}
