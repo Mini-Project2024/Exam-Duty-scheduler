@@ -1,18 +1,24 @@
-.wavy-border {
-    position: relative;
-    width: 10px;
-    background: #3572EF;
+.fade-in {
+  animation: fadeIn 2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
-  
-  .wavy-border::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    height: 100%;
-    background: #3572EF;
-    clip-path: polygon(50% 0%, 55% 20%, 50% 40%, 45% 20%);
+  to {
+    opacity: 1;
   }
-  
+}
+
+/* .flex-row {
+  display: flex;
+} */
+
+.left-side {
+  background: linear-gradient(to right, white, rgba(255, 255, 255, 0));
+}
+
+.right-side {
+  background: linear-gradient(to left, #3572EF, rgba(53, 114, 239, 0));
+}

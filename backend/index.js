@@ -50,11 +50,6 @@ function decrypt(encryptedMessage, encryptionMethod, secret, iv){
 }
 
 
-// Login route
- // Adjust path as per your project structure
-
-// Import the Token model
-
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
