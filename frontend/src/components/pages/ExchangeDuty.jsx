@@ -4,12 +4,16 @@ import toast, { Toaster } from 'react-hot-toast';
 
 const ExchangeDuty = () => {
   const [assignments, setAssignments] = useState([]);
+  const [assignedFaculty, setAssignedFaculty] = useState([]);
+  const [availableFaculty, setAvailableFaculty] = useState([]);
+  const [availableSessions, setAvailableSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [exchangeFormVisible, setExchangeFormVisible] = useState(false);
   const [exchangeDateId, setExchangeDateId] = useState('');
   const [exchangeFacultyId, setExchangeFacultyId] = useState('');
   const [exchangeSession, setExchangeSession] = useState('');
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState('');
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -33,17 +37,49 @@ const ExchangeDuty = () => {
       }
     };
 
+    const fetchAssignedFaculty = async () => {
+      try {
+        const response = await axios.get('http://localhost:3106/assignedFaculty', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        setAssignedFaculty(response.data);
+      } catch (err) {
+        console.error('Failed to fetch assigned faculty', err);
+      }
+    };
+
     fetchUserDetails();
+    fetchAssignedFaculty();
   }, []);
 
-  const handleExchangeRequest = async (assignmentId) => {
-    try {
-      // Toggle the exchange form visibility
-      setExchangeFormVisible(true);
-    } catch (err) {
-      toast.error('Failed to request exchange.');
-      console.error(err.message);
-    }
+  const handleExchangeRequest = (assignmentId) => {
+    setSelectedAssignmentId(assignmentId);
+    setExchangeFormVisible(true);
+  };
+
+  const handleDateChange = (e) => {
+    const selectedDateId = e.target.value;
+    setExchangeDateId(selectedDateId);
+
+    const facultyForDate = assignedFaculty.filter(faculty => faculty.examDateId._id === selectedDateId);
+    setAvailableFaculty(facultyForDate);
+    setExchangeFacultyId('');
+    setAvailableSessions([]);
+  };
+
+  const handleFacultyChange = (e) => {
+    const selectedFacultyId = e.target.value;
+    setExchangeFacultyId(selectedFacultyId);
+
+    const sessionsForFaculty = assignedFaculty
+      .filter(faculty => faculty.facultyId._id === selectedFacultyId && faculty.examDateId._id === exchangeDateId)
+      .map(faculty => faculty.examDateId.session);
+
+    setAvailableSessions(sessionsForFaculty);
+    setExchangeSession('');
   };
 
   const handleSubmitExchange = async (event) => {
@@ -65,15 +101,18 @@ const ExchangeDuty = () => {
       });
 
       toast.success(response.data.message);
-      // Optionally, you can refresh assignments or update UI after successful exchange
-      // Example: Fetch updated assignments list
-      // fetchUserDetails();
-      
-      // Hide the exchange form after successful exchange
+
+      const updatedAssignments = await axios.get('http://localhost:3106/exchangeDuty', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setAssignments(updatedAssignments.data);
+
       setExchangeFormVisible(false);
     } catch (err) {
+      console.error('Failed to request exchange:', err);
       toast.error('Failed to request exchange.');
-      console.error(err.message);
     }
   };
 
@@ -108,9 +147,6 @@ const ExchangeDuty = () => {
                   Session
                 </th>
                 <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Subject
-                </th>
-                <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Change
                 </th>
               </tr>
@@ -131,9 +167,6 @@ const ExchangeDuty = () => {
                     {assignment.examDateId.session}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                    {assignment.subject}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                     <button
                       className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
                       onClick={() => handleExchangeRequest(assignment._id)}
@@ -147,26 +180,77 @@ const ExchangeDuty = () => {
           </table>
         </div>
       )}
-      {/* Exchange Form */}
       {exchangeFormVisible && (
         <div className="mt-4 border border-gray-200 p-4 rounded-md">
           <h2 className="text-lg font-semibold mb-2">Exchange Duty</h2>
           <form onSubmit={handleSubmitExchange}>
             <div className="mb-2">
-              <label htmlFor="exchangeDateId" className="block text-sm font-medium text-gray-700">Exchange Date ID:</label>
-              <input type="text" id="exchangeDateId" value={exchangeDateId} onChange={(e) => setExchangeDateId(e.target.value)} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
+              <label htmlFor="exchangeDateId" className="block text-sm font-medium text-gray-700">Exchange Date:</label>
+              <select
+                id="exchangeDateId"
+                onChange={handleDateChange}
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                value={exchangeDateId}
+                required
+              >
+                <option value="">Select Date</option>
+                {assignedFaculty.map(faculty => (
+                  <option key={faculty.examDateId._id} value={faculty.examDateId._id}>
+                    {faculty.examDateId.examDate}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="mb-2">
-              <label htmlFor="exchangeFacultyId" className="block text-sm font-medium text-gray-700">Exchange Faculty ID:</label>
-              <input type="text" id="exchangeFacultyId" value={exchangeFacultyId} onChange={(e) => setExchangeFacultyId(e.target.value)} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
+              <label htmlFor="exchangeFacultyId" className="block text-sm font-medium text-gray-700">Exchange Faculty:</label>
+              <select
+                id="exchangeFacultyId"
+                onChange={handleFacultyChange}
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                value={exchangeFacultyId}
+                required
+                disabled={!exchangeDateId}
+              >
+                <option value="">Select Faculty</option>
+                {availableFaculty.map(faculty => (
+                  <option key={faculty.facultyId._id} value={faculty.facultyId._id}>
+                    {faculty.facultyId.name}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="mb-4">
+            <div className="mb-2">
               <label htmlFor="exchangeSession" className="block text-sm font-medium text-gray-700">Exchange Session:</label>
-              <input type="text" id="exchangeSession" value={exchangeSession} onChange={(e) => setExchangeSession(e.target.value)} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
+              <select
+                id="exchangeSession"
+                onChange={(e) => setExchangeSession(e.target.value)}
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                value={exchangeSession}
+                required
+                disabled={!exchangeFacultyId}
+              >
+                <option value="">Select Session</option>
+                {availableSessions.map((session, index) => (
+                  <option key={index} value={session}>
+                    {session}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="flex justify-between">
-              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300">Save and Exchange</button>
-              <button type="button" onClick={handleCancelExchange} className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md ml-2 hover:bg-gray-400 focus:outline-none focus:ring focus:ring-gray-500">Cancel</button>
+            <div className="mt-4 flex justify-end space-x-2">
+              <button
+                type="button"
+                className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 focus:outline-none focus:ring focus:ring-gray-300"
+                onClick={handleCancelExchange}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+              >
+                Submit Exchange
+              </button>
             </div>
           </form>
         </div>

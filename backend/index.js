@@ -416,55 +416,45 @@ app.get("/exchangeDuty", passport.authenticate('jwt', { session: false }), async
   }
 });
 
-// POST endpoint for handling duty exchange request
-app.post("/requestExchange/:id", passport.authenticate('jwt', { session: false }), async (req, res) => {
+// Route to handle duty exchange request
+app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
-    // Ensure user is authenticated
-    if (!req.user) {
-      throw new Error('User not authenticated');
-    }
-
-    const { id } = req.params; // Assignment ID
+    const { assignmentId } = req.params;
     const { exchangeDateId, exchangeFacultyId, exchangeSession } = req.body;
+    const userId = req.user.id;
 
-    // Find the assignment by ID
-    const assignment = await AssignmentModel.findById(id);
-    if (!assignment) {
-      return res.status(404).json({ success: false, message: "Assignment not found" });
+    const userAssignment = await AssignmentModel.findById(assignmentId);
+    const exchangeAssignment = await AssignmentModel.findOne({
+      facultyId: exchangeFacultyId,
+      examDateId: exchangeDateId,
+      session: exchangeSession,
+    });
+
+    if (!userAssignment || !exchangeAssignment) {
+      return res.status(404).json({ message: 'Assignment not found' });
     }
 
-    // Fetch details of the original assignment
-    const originalExamDateId = assignment.examDateId;
-    const originalFacultyId = assignment.facultyId;
-    const originalSession = assignment.session;
+    // Swap the assignments
+    const tempDateId = userAssignment.examDateId;
+    const tempFacultyId = userAssignment.facultyId;
+    const tempSession = userAssignment.examDateId.session;
 
-    // Update the assignment with exchanged details
-    assignment.examDateId = exchangeDateId;
-    assignment.facultyId = exchangeFacultyId;
-    assignment.session = exchangeSession;
+    userAssignment.examDateId = exchangeAssignment.examDateId;
+    userAssignment.facultyId = exchangeAssignment.facultyId;
+    userAssignment.examDateId.session = exchangeAssignment.session;
 
-    // Save the updated assignment
-    await assignment.save();
+    exchangeAssignment.examDateId = tempDateId;
+    exchangeAssignment.facultyId = tempFacultyId;
+    exchangeAssignment.session = tempSession;
 
-    res.status(200).json({ success: true, message: "Duty exchange successful", assignment });
-  } catch (error) {
-    console.error("Error exchanging duty:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error exchanging duty",
-      error: error.message,
-    });
+    await userAssignment.save();
+    await exchangeAssignment.save();
+
+    res.json({ message: 'Exchange successful' });
+  } catch (err) {
+    console.error('Failed to request exchange:', err);
+    res.status(500).json({ message: 'Failed to request exchange', error: err.message });
   }
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err);
-  res.status(500).json({
-    success: false,
-    message: "Internal Server Error",
-    error: err.message,
-  });
 });
 
 
