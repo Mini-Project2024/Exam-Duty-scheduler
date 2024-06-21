@@ -12,6 +12,6 @@ export const Userdata = [
     {
         title:"Exchange Duty",
         icon:<ChangeCircleIcon/>,
-        link:"/users/Exchange"
+        link:"/users/exchangeDuty"
     }
 ];
