@@ -26,5 +26,9 @@ export const SidebarData = [
         icon: <EventAvailableIcon/>,
         link: "/main/examDates"
     },
-   
+    {
+        title:"Approve Exchanges",
+        icon:<EventAvailableIcon/>,
+        link:"/main/approveExchange"
+    }
 ];
