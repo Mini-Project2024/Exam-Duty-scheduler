@@ -248,7 +248,7 @@ const ExchangeDuty = () => {
               <button
                 type="submit"
                 className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
-              >
+              onClick={handleExchangeRequest}>
                 Submit Exchange
               </button>
             </div>

@@ -4,7 +4,11 @@ const ExchangeRequest = require('./models/ExchangeReq');
 
 // Get all exchange requests (for admin)
 app.get('/exchangeRequests', async (req, res) => {
+  
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
     const exchangeRequests = await ExchangeRequest.find()
       .populate({
         path: 'originalAssignment',

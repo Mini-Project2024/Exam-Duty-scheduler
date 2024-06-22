@@ -506,66 +506,69 @@ app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { sessio
 
 
 
-// Get all exchange requests (for admin)
-app.get('/exchangeRequests', async (req, res) => {
-  try {
-    const exchangeRequests = await ExchangeRequest.find().populate({
-      path: 'originalAssignment',
-      populate: {
-        path: 'examDateId',
-        select: ['_id', 'examDate', 'examName'],
-      },
-    }).populate({
-      path: 'exchangeFacultyId',
-      select: ['_id', 'name'],
-    }).exec();
+// // Get all exchange requests (for admin)
+// app.get('/admin/exchangeRequests', async (req, res) => {
+//   try {
+//     if (!req.user) {
+//             throw new Error('User not authenticated');
+//            }
+//     const exchangeRequests = await ExchangeRequest.find().populate({
+//       path: 'originalAssignment',
+//       populate: {
+//         path: 'examDateId',
+//         select: ['_id', 'examDate', 'examName'],
+//       },
+//     }).populate({
+//       path: 'exchangeFacultyId',
+//       select: ['_id', 'name'],
+//     }).exec();
 
-    res.json(exchangeRequests);
-  } catch (error) {
-    console.error('Error fetching exchange requests:', error);
-    res.status(500).json({ message: 'Error fetching exchange requests', error: error.message });
-  }
-});
+//     res.json(exchangeRequests);
+//   } catch (error) {
+//     console.error('Error fetching exchange requests:', error);
+//     res.status(500).json({ message: 'Error fetching exchange requests', error: error.message });
+//   }
+// });
 
 // Approve exchange request
-app.put('/approveExchangeRequest/:requestId', async (req, res) => {
-  try {
-    const { requestId } = req.params;
+// app.put('/approveExchangeRequest/:requestId', async (req, res) => {
+//   try {
+//     const { requestId } = req.params;
 
-    const exchangeRequest = await ExchangeRequest.findByIdAndUpdate(requestId, { status: 'Approved' }, { new: true });
+//     const exchangeRequest = await ExchangeRequest.findByIdAndUpdate(requestId, { status: 'Approved' }, { new: true });
 
-    if (!exchangeRequest) {
-      return res.status(404).json({ message: 'Exchange request not found' });
-    }
+//     if (!exchangeRequest) {
+//       return res.status(404).json({ message: 'Exchange request not found' });
+//     }
 
-    // Perform additional actions if needed (e.g., update assignments)
+//     // Perform additional actions if needed (e.g., update assignments)
 
-    res.json({ message: 'Exchange request approved successfully', data: exchangeRequest });
-  } catch (error) {
-    console.error('Error approving exchange request:', error);
-    res.status(500).json({ message: 'Error approving exchange request', error: error.message });
-  }
-});
+//     res.json({ message: 'Exchange request approved successfully', data: exchangeRequest });
+//   } catch (error) {
+//     console.error('Error approving exchange request:', error);
+//     res.status(500).json({ message: 'Error approving exchange request', error: error.message });
+//   }
+// });
 
-// Reject exchange request
-app.put('/rejectExchangeRequest/:requestId', async (req, res) => {
-  try {
-    const { requestId } = req.params;
+// // Reject exchange request
+// app.put('/rejectExchangeRequest/:requestId', async (req, res) => {
+//   try {
+//     const { requestId } = req.params;
 
-    const exchangeRequest = await ExchangeRequest.findByIdAndUpdate(requestId, { status: 'Rejected' }, { new: true });
+//     const exchangeRequest = await ExchangeRequest.findByIdAndUpdate(requestId, { status: 'Rejected' }, { new: true });
 
-    if (!exchangeRequest) {
-      return res.status(404).json({ message: 'Exchange request not found' });
-    }
+//     if (!exchangeRequest) {
+//       return res.status(404).json({ message: 'Exchange request not found' });
+//     }
 
-    // Perform additional actions if needed
+//     // Perform additional actions if needed
 
-    res.json({ message: 'Exchange request rejected successfully', data: exchangeRequest });
-  } catch (error) {
-    console.error('Error rejecting exchange request:', error);
-    res.status(500).json({ message: 'Error rejecting exchange request', error: error.message });
-  }
-});
+//     res.json({ message: 'Exchange request rejected successfully', data: exchangeRequest });
+//   } catch (error) {
+//     console.error('Error rejecting exchange request:', error);
+//     res.status(500).json({ message: 'Error rejecting exchange request', error: error.message });
+//   }
+// });
 
 
 
