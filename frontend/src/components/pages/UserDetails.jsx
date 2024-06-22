@@ -41,22 +41,22 @@ const UserDetails = () => {
         <p>No assignments found.</p>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-white border border-gray-200">
+          <table className="table-auto w-full my-4">
             <thead>
               <tr>
-                <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className='px-4 py-2 border border-gray-300'>
                   Exam Name
                 </th>
-                <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className='px-4 py-2 border border-gray-300'>
                   Exam Date
                 </th>
-                <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className='px-4 py-2 border border-gray-300'>
                   Semester
                 </th>
-                <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className='px-4 py-2 border border-gray-300'>
                   Session
                 </th>
-                <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className='px-4 py-2 border border-gray-300'>
                   Subject
                 </th>
               </tr>
@@ -64,19 +64,19 @@ const UserDetails = () => {
             <tbody>
               {assignments.map((assignment) => (
                 <tr key={assignment._id} className="bg-white">
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  <td className='px-4 py-2 border border-gray-300 text-center'>
                     {assignment.examDateId.examName}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  <td className='px-4 py-2 border border-gray-300 text-center'>
                     {assignment.examDateId.examDate}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  <td className='px-4 py-2 border border-gray-300 text-center'>
                     {assignment.examDateId.semester}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  <td className='px-4 py-2 border border-gray-300 text-center'>
                     {assignment.examDateId.session}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  <td className='px-4 py-2 border border-gray-300 text-center'>
                     {assignment.subject}
                   </td>
                 </tr>

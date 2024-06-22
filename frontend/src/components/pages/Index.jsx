@@ -1,13 +1,27 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import toast, { Toaster } from 'react-hot-toast';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 import "../css/Index.css";
 import logo from "../../images/logo.png";
+import LoginIcon from "@mui/icons-material/Login";
+import backgroundImg from "../../images/CEC.jpg";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import logo2 from "../../images/Ammembal.png"
 
 function Index() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoginVisible, setIsLoginVisible] = useState(false);
+
+  const handleLoginClick = () => {
+    setIsLoginVisible(true);
+  };
+
+  const handleCloseLogin = () => {
+    setIsLoginVisible(false);
+  };
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -23,15 +37,15 @@ function Index() {
       // Check if the login was successful
       if (response.data.success) {
         // Store token in localStorage
-        localStorage.setItem('token', response.data.token);
-        
+        localStorage.setItem("token", response.data.token);
+
         toast.success("User logged in successfully");
-        
+
         setTimeout(() => {
           if (username === "myadmin" && password === "admin123") {
-            navigate('/main');
+            navigate("/main/assignduty");
           } else {
-            navigate('/users');
+            navigate("/users/DutyDetails");
           }
         }, 1000);
       } else {
@@ -45,29 +59,69 @@ function Index() {
   };
 
   return (
-    <div className="flex flex-row min-h-screen bg-[#3572EF] text-white">
-      {/* Left side */}
-      <div className="flex flex-col justify-center items-center w-1/2 p-8 bg-white text-black  shadow-lg">
-        <img src={logo} className="w-28 absolute top-3 left-3" alt="logo" />
-        <div className="text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            CANARA DUTY SCHEDULER
-          </h1>
-          <p className="text-lg md:text-xl text-left max-w-md">
-            Welcome to the Canara Duty Scheduler.
-            <br />
-            Please login to continue.
-          </p>
+    <>
+      <Toaster />
+      <div
+        className="min-h-screen w-full text-white relative bg-cover bg-center"
+        style={{ backgroundImage: `url(${backgroundImg})` }}
+      >
+        <img
+          src={logo}
+          className="w-28 absolute top-3 left-3 z-50"
+          alt="logo"
+        />
+
+        <img
+          src={logo2}
+          className="w-24 rounded-full absolute top-3 right-3 z-50"
+          alt="logo"
+        />
+
+        {/* Adding black tint */}
+        <div className="absolute inset-0 bg-black opacity-40 z-30"></div>
+
+        <div>
+          <div className="flex flex-col justify-start items-start top-24 p-16 text-white w-full absolute z-40">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              SEMESTER END DUTY SCHEDULER
+            </h1>
+            <h6 className="text-lg md:text-xl max-w-md">
+              Welcome to the Canara Semester End Duty Scheduler.
+              <br />
+              <br />
+              <p className="text-lg">
+                A platform that is designed to streamline the process of
+                scheduling and managing examination duties. This website enables
+                administrators to efficiently assign exam duties to faculty
+                members. Its intuitive interface and robust functionality ensure
+                a seamless experience for all users.
+              </p>
+              <br />
+              <button
+                className="text-white font-bold text-xl px-9 py-2 rounded-3xl
+               border-white border-2 hover:bg-white hover:text-[#3572EF] hover:border-[#3572EF]  
+               bg-[#3572EF] transform ease-in-out cursor-pointer"
+                onClick={handleLoginClick}
+              >
+                login
+                <LoginIcon />
+              </button>
+            </h6>
+          </div>
         </div>
       </div>
 
-      {/* Wavy border */}
-      <div className="wavy-border"></div>
-
-      {/* Right side */}
-      <div className="flex flex-col justify-center items-center w-1/2 p-8 max-w-sm mx-auto">
-        <Toaster />
-        <h1 className="text-4xl font-bold mb-6">Login</h1>
+      <div
+        className={`fixed top-0 right-0 h-full w-1/4 bg-[#3572EF] p-8 transition-all ease-in-out ${
+          isLoginVisible ? "opacity-1 duration-300" : "opacity-0 duration-300"
+        } z-50`}
+        style={{ display: isLoginVisible ? "block" : "none" }}
+      >
+        <CloseRoundedIcon
+          className="absolute top-3 right-3 text-white cursor-pointer"
+          onClick={handleCloseLogin}
+        />
+        <h1 className="text-4xl text-white font-bold mb-6">Login</h1>
         <form onSubmit={handleSubmit} className="w-full space-y-6">
           <div className="flex flex-col">
             <label htmlFor="username" className="text-white font-bold mb-2">
@@ -76,9 +130,9 @@ function Index() {
             <input
               type="text"
               id="username"
+              required
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              required
               className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3572EF] mb-4 text-black"
             />
           </div>
@@ -89,21 +143,22 @@ function Index() {
             <input
               type="password"
               id="password"
+              required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
               className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3572EF] mb-4 text-black"
             />
           </div>
           <button
             type="submit"
+            onClick={handleSubmit}
             className="w-full bg-[#6397ff] border-[3px] text-white py-2 px-3 rounded-full font-medium cursor-pointer hover:bg-[#2856bf] transition-background-color duration-300 ease-in-out"
           >
             Submit
           </button>
         </form>
       </div>
-    </div>
+    </>
   );
 }
 

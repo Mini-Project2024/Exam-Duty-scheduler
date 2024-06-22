@@ -19,7 +19,10 @@ const AddFaculty = () => {
   const fetchFacultyData = async () => {
     try {
       const response = await axios.get("http://localhost:3106/faculty");
-      setFacultyData(response.data);
+      const sortedData = response.data.sort((a, b) => {
+        return new Date(parseInt(b._id.substring(0, 8), 16) * 1000) - new Date(parseInt(a._id.substring(0, 8), 16) * 1000);
+      });
+      setFacultyData(sortedData);
     } catch (error) {
       console.error(error);
       toast.error("Error fetching faculty data.");
@@ -74,12 +77,15 @@ const AddFaculty = () => {
 
   const handleUpdateSubmit = async () => {
     try {
-      await axios.put(`http://localhost:3106/updateFaculty/${selectedFaculty._id}`, {
-        name,
-        designation,
-        password, // Include password in the update request
-        dept,
-      });
+      await axios.put(
+        `http://localhost:3106/updateFaculty/${selectedFaculty._id}`,
+        {
+          name,
+          designation,
+          password, // Include password in the update request
+          dept,
+        }
+      );
       toast.success("Faculty member updated successfully!");
       setTimeout(() => {
         clearForm();
@@ -103,14 +109,16 @@ const AddFaculty = () => {
 
   return (
     <section className="min-h-screen flex flex-col gap-4 items-center justify-center p-5 bg-gray-100">
-      <Toaster/>
+      <Toaster />
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center">
           {selectedFaculty ? "Update Faculty Member" : "Add Faculty Member"}
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Name:</label>
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Name:
+            </label>
             <input
               type="text"
               name="name"
@@ -121,7 +129,9 @@ const AddFaculty = () => {
             />
           </div>
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Designation:</label>
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Designation:
+            </label>
             <input
               type="text"
               name="designation"
@@ -133,7 +143,9 @@ const AddFaculty = () => {
           </div>
           {!selectedFaculty && (
             <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">Password:</label>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Password:
+              </label>
               <input
                 type="password"
                 name="password"
@@ -145,7 +157,9 @@ const AddFaculty = () => {
             </div>
           )}
           <div>
-            <label className="block mb-2 text-sm font-medium text-gray-700">Department:</label>
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Department:
+            </label>
             <select
               name="department"
               value={dept}
@@ -186,10 +200,18 @@ const AddFaculty = () => {
             </tr>
             {facultyData.map((faculty) => (
               <tr key={faculty._id}>
-                <td className="px-4 py-2 border border-gray-300">{faculty.name}</td>
-                <td className="px-4 py-2 border border-gray-300">{faculty.designation}</td>
-                <td className="px-4 py-2 border border-gray-300">{faculty.dept}</td>
-                <td className="px-4 py-2 border border-gray-300">{faculty.password}</td>
+                <td className="px-4 py-2 border border-gray-300">
+                  {faculty.name}
+                </td>
+                <td className="px-4 py-2 border border-gray-300">
+                  {faculty.designation}
+                </td>
+                <td className="px-4 py-2 border border-gray-300">
+                  {faculty.dept}
+                </td>
+                <td className="px-4 py-2 border border-gray-300">
+                  {faculty.password}
+                </td>
                 <td className="px-4 py-2 border border-gray-300">
                   <button
                     className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300"
