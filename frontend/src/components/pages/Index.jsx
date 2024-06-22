@@ -43,9 +43,9 @@ function Index() {
 
         setTimeout(() => {
           if (username === "myadmin" && password === "admin123") {
-            navigate("/main");
+            navigate("/main/assignduty");
           } else {
-            navigate("/users");
+            navigate("/users/DutyDetails");
           }
         }, 1000);
       } else {
