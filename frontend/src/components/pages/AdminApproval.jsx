@@ -10,7 +10,7 @@ const AdminExchangeRequests = () => {
   useEffect(() => {
     const fetchExchangeRequests = async () => {
       try {
-        const response = await axios.get('http://localhost:3106/admin/exchangeRequests', {
+        const response = await axios.get('http://localhost:3106/admin/exchangeRequestslist', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('adminToken')}`, // Admin token
           },
@@ -106,53 +106,60 @@ const AdminExchangeRequests = () => {
             </tr>
           </thead>
           <tbody>
-            {exchangeRequests.map((request) => (
-              <tr key={request._id} className="bg-white">
-                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.originalAssignment.examDateId.examName}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.originalAssignment.examDateId.examDate}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                {request.originalAssignment.facultyName }
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.originalAssignment.session}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.exchangeDateId.examDate}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.exchangeFacultyId.name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.exchangeSession}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.status}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.status === 'Pending' && (
-                    <div>
-                      <button
-                        className="bg-green-500 text-white px-2 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring focus:ring-green-300 mr-2"
-                        onClick={() => handleApproveRequest(request._id)}
-                      >
-                        Approve
-                      </button>
-                      <button
-                        className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300"
-                        onClick={() => handleRejectRequest(request._id)}
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
+  {exchangeRequests.map((request) => {
+    // Check if originalAssignment and examDateId exist
+    if (!request.originalAssignment || !request.originalAssignment.examDateId) {
+      return null; // Skip this request if data is incomplete
+    }
+    return (
+      <tr key={request._id} className="bg-white">
+        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+          {request.originalAssignment.examDateId.examName}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+          {request.originalAssignment.examDateId.examDate}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+          {request.originalAssignment.facultyName}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+          {request.originalAssignment.examDateId.session}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+          {request.exchangeDateId.examDate}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+          {request.exchangeFacultyId.name}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+          {request.exchangeSession}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+          {request.status}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+          {request.status === 'Pending' && (
+            <div>
+              <button
+                className="bg-green-500 text-white px-2 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring focus:ring-green-300 mr-2"
+                onClick={() => handleApproveRequest(request._id)}
+              >
+                Approve
+              </button>
+              <button
+                className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300"
+                onClick={() => handleRejectRequest(request._id)}
+              >
+                Reject
+              </button>
+            </div>
+          )}
+        </td>
+      </tr>
+    );
+  })}
+</tbody>
+
         </table>
       </div>
     </div>

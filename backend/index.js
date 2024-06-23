@@ -19,7 +19,7 @@ app.use(cors());
 app.use(express.json());
 
 // Use admin routes
-app.use('/admin', adminRoutes);
+// app.use('/admin', adminRoutes);
 // app.use((err, req, res, next) => {
 //   console.error(err.stack);
 //   res.status(500).send('Something broke!');
@@ -463,11 +463,16 @@ app.get("/exchangeDuty", passport.authenticate('jwt', { session: false }), async
 
 
 
+
 app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
     const { assignmentId } = req.params;
     const { exchangeDateId, exchangeFacultyId, exchangeSession } = req.body;
     const userId = req.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(assignmentId) || !mongoose.Types.ObjectId.isValid(exchangeDateId) || !mongoose.Types.ObjectId.isValid(exchangeFacultyId)) {
+      return res.status(400).json({ message: 'Invalid ID format' });
+    }
 
     const userAssignment = await AssignmentModel.findById(assignmentId);
     const exchangeAssignment = await AssignmentModel.findOne({
@@ -480,13 +485,13 @@ app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { sessio
       return res.status(404).json({ message: 'Assignment not found' });
     }
 
-    // Create exchange request
     const exchangeRequest = new ExchangeRequest({
       originalAssignment: userAssignment._id,
+      exchangeAssignment: exchangeAssignment._id,
       exchangeDateId,
       exchangeFacultyId,
       exchangeSession,
-      status: 'Pending', // Initial status is pending
+      status: 'Pending',
     });
 
     await exchangeRequest.save();
@@ -500,30 +505,84 @@ app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { sessio
 
 
 
+// Get all exchange requests (for admin)
+app.get('/admin/exchangeRequestslist', async (req, res) => {
+  try {
+    const exchangeRequests = await ExchangeRequest.find()
+      .populate({
+        path: 'originalAssignment',
+        populate: {
+          path: 'examDateId',
+          select: ['_id', 'examDate', 'examName', 'session'],
+        },
+      })
+      .populate({
+        path: 'exchangeFacultyId',
+        select: ['_id', 'name'],
+      })
+      .populate({
+        path: 'exchangeDateId',
+      })
+      .exec();
 
-// // Get all exchange requests (for admin)
-// app.get('/admin/exchangeRequests', async (req, res) => {
-//   try {
-//     if (!req.user) {
-//             throw new Error('User not authenticated');
-//            }
-//     const exchangeRequests = await ExchangeRequest.find().populate({
-//       path: 'originalAssignment',
-//       populate: {
-//         path: 'examDateId',
-//         select: ['_id', 'examDate', 'examName'],
-//       },
-//     }).populate({
-//       path: 'exchangeFacultyId',
-//       select: ['_id', 'name'],
-//     }).exec();
+    // Filter out any requests with missing originalAssignment or examDateId
+    const filteredRequests = exchangeRequests.filter(request => request.originalAssignment && request.originalAssignment.examDateId);
 
-//     res.json(exchangeRequests);
-//   } catch (error) {
-//     console.error('Error fetching exchange requests:', error);
-//     res.status(500).json({ message: 'Error fetching exchange requests', error: error.message });
-//   }
-// });
+    res.json(filteredRequests);
+  } catch (error) {
+    console.error('Error fetching exchange requests:', error);
+    res.status(500).json({ message: 'Error fetching exchange requests', error: error.message });
+  }
+});
+
+app.put('/admin/approveExchangeRequest/:requestId', async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const exchangeRequest = await ExchangeRequest.findById(requestId)
+      .populate('originalAssignment')
+      .populate('exchangeFacultyId')
+      .populate('exchangeDateId');
+
+    if (!exchangeRequest) {
+      return res.status(404).json({ message: 'Exchange request not found' });
+    }
+
+    // Get the original assignment and exchange faculty
+    const originalAssignment = exchangeRequest.originalAssignment;
+    const exchangeFaculty = exchangeRequest.exchangeFacultyId;
+    const exchangeDate = exchangeRequest.exchangeDateId;
+    const exchangeSession = exchangeRequest.exchangeSession;
+
+    // Find the exchange assignment
+    const exchangeAssignment = await AssignmentModel.findOne({ 
+      examDateId: exchangeDate._id, 
+      session: exchangeSession,
+      facultyId: exchangeFaculty._id
+    });
+
+    if (!exchangeAssignment) {
+      return res.status(404).json({ message: 'Exchange assignment not found' });
+    }
+
+    // Swap the faculty members
+    const originalFacultyId = originalAssignment.facultyId;
+    originalAssignment.facultyId = exchangeFaculty._id;
+    exchangeAssignment.facultyId = originalFacultyId;
+
+    // Save the changes
+    await originalAssignment.save();
+    await exchangeAssignment.save();
+
+    // Update the exchange request status
+    exchangeRequest.status = 'Approved';
+    await exchangeRequest.save();
+
+    res.json({ message: 'Exchange request approved successfully', data: exchangeRequest });
+  } catch (error) {
+    console.error('Error approving exchange request:', error);
+    res.status(500).json({ message: 'Error approving exchange request', error: error.message });
+  }
+});
 
 // Approve exchange request
 // app.put('/approveExchangeRequest/:requestId', async (req, res) => {

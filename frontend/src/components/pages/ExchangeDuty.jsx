@@ -89,7 +89,7 @@ const ExchangeDuty = () => {
       if (!token) {
         throw new Error('No token found');
       }
-
+  
       const response = await axios.post(`http://localhost:3106/requestExchange/${selectedAssignmentId}`, {
         exchangeDateId,
         exchangeFacultyId,
@@ -99,23 +99,24 @@ const ExchangeDuty = () => {
           Authorization: `Bearer ${token}`
         }
       });
-
+  
       toast.success(response.data.message);
-
+  
+      // Fetch updated assignments
       const updatedAssignments = await axios.get('http://localhost:3106/exchangeDuty', {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       setAssignments(updatedAssignments.data);
-
+  
       setExchangeFormVisible(false);
     } catch (err) {
       console.error('Failed to request exchange:', err);
       toast.error('Failed to request exchange.');
     }
   };
-
+  
   const handleCancelExchange = () => {
     setExchangeFormVisible(false);
   };
@@ -248,7 +249,7 @@ const ExchangeDuty = () => {
               <button
                 type="submit"
                 className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
-              onClick={handleExchangeRequest}>
+              >
                 Submit Exchange
               </button>
             </div>
