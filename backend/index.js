@@ -470,6 +470,7 @@ app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { sessio
     const { exchangeDateId, exchangeFacultyId, exchangeSession } = req.body;
     const userId = req.user.id;
 
+    // Ensure the IDs are valid ObjectId types
     if (!mongoose.Types.ObjectId.isValid(assignmentId) || !mongoose.Types.ObjectId.isValid(exchangeDateId) || !mongoose.Types.ObjectId.isValid(exchangeFacultyId)) {
       return res.status(400).json({ message: 'Invalid ID format' });
     }
@@ -485,13 +486,13 @@ app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { sessio
       return res.status(404).json({ message: 'Assignment not found' });
     }
 
+    // Create exchange request
     const exchangeRequest = new ExchangeRequest({
       originalAssignment: userAssignment._id,
-      exchangeAssignment: exchangeAssignment._id,
       exchangeDateId,
       exchangeFacultyId,
       exchangeSession,
-      status: 'Pending',
+      status: 'Pending', // Initial status is pending
     });
 
     await exchangeRequest.save();
@@ -502,7 +503,6 @@ app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { sessio
     res.status(500).json({ message: 'Failed to request exchange', error: err.message });
   }
 });
-
 
 
 // Get all exchange requests (for admin)
@@ -535,27 +535,51 @@ app.get('/admin/exchangeRequestslist', async (req, res) => {
   }
 });
 
+const updateAssignmentFaculty = async (assignmentId, newFacultyId) => {
+  const updatedAssignment = await AssignmentModel.findByIdAndUpdate(
+    assignmentId,
+    { facultyId: newFacultyId },
+    { new: true }
+  );
+
+  return updatedAssignment;
+};
+
 app.put('/admin/approveExchangeRequest/:requestId', async (req, res) => {
   try {
     const { requestId } = req.params;
+
+    // Find the exchange request and populate the required fields
     const exchangeRequest = await ExchangeRequest.findById(requestId)
-      .populate('originalAssignment')
-      .populate('exchangeFacultyId')
-      .populate('exchangeDateId');
+      .populate({
+        path: 'originalAssignment',
+        populate: {
+          path: 'facultyId',
+          model: 'examduty'
+        }
+      })
+      .populate({
+        path: 'exchangeFacultyId',
+        model: 'examduty'
+      })
+      .populate({
+        path: 'exchangeDateId',
+        model: 'ExamDate'
+      });
 
     if (!exchangeRequest) {
       return res.status(404).json({ message: 'Exchange request not found' });
     }
 
-    // Get the original assignment and exchange faculty
+    // Extract the details from the exchange request
     const originalAssignment = exchangeRequest.originalAssignment;
     const exchangeFaculty = exchangeRequest.exchangeFacultyId;
     const exchangeDate = exchangeRequest.exchangeDateId;
     const exchangeSession = exchangeRequest.exchangeSession;
 
-    // Find the exchange assignment
-    const exchangeAssignment = await AssignmentModel.findOne({ 
-      examDateId: exchangeDate._id, 
+    // Find the assignment for the exchange faculty on the specified date and session
+    const exchangeAssignment = await AssignmentModel.findOne({
+      examDateId: exchangeDate._id,
       session: exchangeSession,
       facultyId: exchangeFaculty._id
     });
@@ -564,25 +588,44 @@ app.put('/admin/approveExchangeRequest/:requestId', async (req, res) => {
       return res.status(404).json({ message: 'Exchange assignment not found' });
     }
 
-    // Swap the faculty members
+    // Temporary variables to store the faculty details
     const originalFacultyId = originalAssignment.facultyId;
-    originalAssignment.facultyId = exchangeFaculty._id;
+    const originalFacultyName = originalAssignment.facultyName;
+    const exchangeFacultyId = exchangeFaculty._id;
+    const exchangeFacultyName = exchangeFaculty.name;
+
+    // Swap the faculty IDs and names
+    originalAssignment.facultyId = exchangeFacultyId;
+    originalAssignment.facultyName = exchangeFacultyName;
     exchangeAssignment.facultyId = originalFacultyId;
+    exchangeAssignment.facultyName = originalFacultyName;
 
     // Save the changes
     await originalAssignment.save();
     await exchangeAssignment.save();
 
-    // Update the exchange request status
+    // Update the exchange request status to 'Approved'
     exchangeRequest.status = 'Approved';
     await exchangeRequest.save();
 
     res.json({ message: 'Exchange request approved successfully', data: exchangeRequest });
   } catch (error) {
     console.error('Error approving exchange request:', error);
+
+    const { requestId } = req.params;
+    const exchangeRequest = await ExchangeRequest.findById(requestId);
+
+    if (exchangeRequest && exchangeRequest.status === 'Pending') {
+      exchangeRequest.status = 'Rejected';
+      await exchangeRequest.save();
+    }
+
     res.status(500).json({ message: 'Error approving exchange request', error: error.message });
   }
 });
+
+
+
 
 // Approve exchange request
 // app.put('/approveExchangeRequest/:requestId', async (req, res) => {
@@ -605,25 +648,22 @@ app.put('/admin/approveExchangeRequest/:requestId', async (req, res) => {
 // });
 
 // // Reject exchange request
-// app.put('/rejectExchangeRequest/:requestId', async (req, res) => {
-//   try {
-//     const { requestId } = req.params;
+app.put('/admin/rejectExchangeRequest/:requestId', async (req, res) => {
+  try {
+    const { requestId } = req.params;
 
-//     const exchangeRequest = await ExchangeRequest.findByIdAndUpdate(requestId, { status: 'Rejected' }, { new: true });
+    const exchangeRequest = await ExchangeRequest.findByIdAndUpdate(requestId, { status: 'Rejected' }, { new: true });
 
-//     if (!exchangeRequest) {
-//       return res.status(404).json({ message: 'Exchange request not found' });
-//     }
+    if (!exchangeRequest) {
+      return res.status(404).json({ message: 'Exchange request not found' });
+    }
 
-//     // Perform additional actions if needed
-
-//     res.json({ message: 'Exchange request rejected successfully', data: exchangeRequest });
-//   } catch (error) {
-//     console.error('Error rejecting exchange request:', error);
-//     res.status(500).json({ message: 'Error rejecting exchange request', error: error.message });
-//   }
-// });
-
+    res.json({ message: 'Exchange request rejected successfully', data: exchangeRequest });
+  } catch (error) {
+    console.error('Error rejecting exchange request:', error);
+    res.status(500).json({ message: 'Error rejecting exchange request', error: error.message });
+  }
+});
 
 
 // Logout feature

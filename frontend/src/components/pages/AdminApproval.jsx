@@ -29,7 +29,7 @@ const AdminExchangeRequests = () => {
 
   const handleApproveRequest = async (requestId) => {
     try {
-      await axios.put(`http://localhost:3106/admin/approveExchangeRequest/${requestId}`, {}, {
+      const response = await axios.put(`http://localhost:3106/admin/approveExchangeRequest/${requestId}`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
         },
@@ -43,6 +43,11 @@ const AdminExchangeRequests = () => {
     } catch (error) {
       console.error('Error approving exchange request:', error);
       toast.error('Failed to approve exchange request');
+      setExchangeRequests((prevRequests) =>
+        prevRequests.map((request) =>
+          request._id === requestId ? { ...request, status: 'Denied' } : request
+        )
+      );
     }
   };
 
@@ -89,13 +94,13 @@ const AdminExchangeRequests = () => {
                 Requested Session
               </th>
               <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                exchange Date
+                Exchange Date
               </th>
               <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                exchange Faculty
+                Exchange Faculty
               </th>
               <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                exchange session
+                Exchange Session
               </th>
               <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
@@ -106,60 +111,53 @@ const AdminExchangeRequests = () => {
             </tr>
           </thead>
           <tbody>
-  {exchangeRequests.map((request) => {
-    // Check if originalAssignment and examDateId exist
-    if (!request.originalAssignment || !request.originalAssignment.examDateId) {
-      return null; // Skip this request if data is incomplete
-    }
-    return (
-      <tr key={request._id} className="bg-white">
-        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-          {request.originalAssignment.examDateId.examName}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-          {request.originalAssignment.examDateId.examDate}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-          {request.originalAssignment.facultyName}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-          {request.originalAssignment.examDateId.session}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-          {request.exchangeDateId.examDate}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-          {request.exchangeFacultyId.name}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-          {request.exchangeSession}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-          {request.status}
-        </td>
-        <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-          {request.status === 'Pending' && (
-            <div>
-              <button
-                className="bg-green-500 text-white px-2 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring focus:ring-green-300 mr-2"
-                onClick={() => handleApproveRequest(request._id)}
-              >
-                Approve
-              </button>
-              <button
-                className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300"
-                onClick={() => handleRejectRequest(request._id)}
-              >
-                Reject
-              </button>
-            </div>
-          )}
-        </td>
-      </tr>
-    );
-  })}
-</tbody>
-
+            {exchangeRequests.map((request) => (
+              <tr key={request._id} className="bg-white">
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  {request.originalAssignment.examDateId.examName}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  {request.originalAssignment.examDateId.examDate}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  {request.originalAssignment.facultyName}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  {request.originalAssignment.session}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  {request.exchangeDateId.examDate}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  {request.exchangeFacultyId.name}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  {request.exchangeSession}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  {request.status}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  {request.status === 'Pending' && (
+                    <div>
+                      <button
+                        className="bg-green-500 text-white px-2 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring focus:ring-green-300 mr-2"
+                        onClick={() => handleApproveRequest(request._id)}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        className="bg-red-500 text-white px-2 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring focus:ring-red-300"
+                        onClick={() => handleRejectRequest(request._id)}
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     </div>
