@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');
 const passport = require('./passport.config.js');
 const ExchangeRequest = require('./models/ExchangeReq.js');
 const adminRoutes = require('./adminRoutes.js');
+const ExcelJS = require('exceljs'); 
 // const path = require("path");
 // const fs = require("fs");
 // const { isValidNumber } = require("face-api.js");
@@ -98,6 +99,72 @@ app.post("/login", async (req, res) => {
     
 
 // API routes
+//generating excel file
+
+app.get('/generateExcel', async (req, res) => {
+  // Extract date range from query parameters
+  const from = req.query.from; // Example: '2024-06-01'
+  const to = req.query.to;     // Example: '2024-06-30'
+
+  // Example data (you can replace this with actual data retrieval based on the date range)
+  const exampleData = [
+    {
+      facultyName: 'John Doe',
+      dept: 'Computer Science',
+      subCode: 'CS101',
+      examName: 'Midterm Exam',
+      noOfDutiesCompleted: 5,
+      signature: ''
+    },
+    {
+      facultyName: 'Jane Smith',
+      dept: 'Mathematics',
+      subCode: 'MATH201',
+      examName: 'Final Exam',
+      noOfDutiesCompleted: 3,
+      signature: ''
+    }
+  ];
+
+  // Create a new workbook and add a worksheet
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Exam Duties');
+
+  // Add "Exam Details" in the first row
+  worksheet.addRow({ ExamDetails: `From ${from} to ${to}` });
+
+  // Add column headers
+  worksheet.columns = [
+    { header: 'Sl No', key: 'slNo', width: 10 },
+    { header: 'Faculty Name', key: 'facultyName', width: 20 },
+    { header: 'Department', key: 'dept', width: 20 },
+    { header: 'Subject Code', key: 'subCode', width: 15 },
+    { header: 'Exam Name', key: 'examName', width: 20 },
+    { header: 'No of Duties Completed', key: 'noOfDutiesCompleted', width: 20 },
+    { header: 'Signature', key: 'signature', width: 50 }
+  ];
+
+  // Add rows with the example data
+  exampleData.forEach((data, index) => {
+    worksheet.addRow({
+      slNo: index + 1,
+      facultyName: data.facultyName,
+      dept: data.dept,
+      subCode: data.subCode,
+      examName: data.examName,
+      noOfDutiesCompleted: data.noOfDutiesCompleted,
+      signature: data.signature
+    });
+  });
+
+  // Set headers for the response
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename=exam_duties.xlsx');
+
+  // Write the workbook to the response
+  await workbook.xlsx.write(res);
+  res.end();
+});
 
 // Add faculty route with encryption
 // Add faculty route with encryption
