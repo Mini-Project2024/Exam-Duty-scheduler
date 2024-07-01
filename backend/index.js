@@ -589,6 +589,55 @@ app.get("/assignedFaculty/me", passport.authenticate('jwt', { session: false }),
 });
 
 
+// ------------------------------------------- demo work ---------------------------------------------
+
+// New route to get distinct exam dates with faculties
+app.get('/distinctExamDates', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    const assignments = await AssignmentModel.find()
+      .populate({
+        path: 'examDateId',
+        select: ['_id', 'examDate', 'examName'],
+      })
+      .populate({
+        path: 'facultyId',
+        select: ['_id', 'name'],
+      });
+
+    // Group by examDateId and gather faculty names
+    const groupedByDate = assignments.reduce((acc, assignment) => {
+      const { examDateId, facultyId } = assignment;
+      const dateKey = examDateId._id;
+      if (!acc[dateKey]) {
+        acc[dateKey] = {
+          examDate: examDateId.examDate,
+          examName: examDateId.examName,
+          faculties: new Set(),
+        };
+      }
+      acc[dateKey].faculties.add(facultyId.name);
+      return acc;
+    }, {});
+
+    // Convert sets to arrays and remove duplicate dates
+    const distinctDates = Object.values(groupedByDate).map(item => ({
+      examDate: item.examDate,
+      examName: item.examName,
+      faculties: Array.from(item.faculties),
+    }));
+
+    res.json(distinctDates);
+  } catch (error) {
+    console.error('Error fetching distinct exam dates:', error);
+    res.status(500).json({ message: 'Error fetching distinct exam dates', error: error.message });
+  }
+});
+
+
+
+
+// ------------------------------------------------------------------------------------------------------
+
 
 // Exchange duty route
 app.get("/exchangeDuty", passport.authenticate('jwt', { session: false }), async (req, res) => {
