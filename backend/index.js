@@ -5,6 +5,11 @@ const cors = require("cors");
 const UserModel = require("./models/Users");
 const examDateModel = require("./models/ExamDate");
 const AssignmentModel = require("./models/Assign");
+const jwt = require('jsonwebtoken');
+const passport = require('./passport.config.js');
+const ExchangeRequest = require('./models/ExchangeReq.js');
+const adminRoutes = require('./adminRoutes.js');
+const ExcelJS = require('exceljs'); 
 // const path = require("path");
 // const fs = require("fs");
 // const { isValidNumber } = require("face-api.js");
@@ -13,6 +18,13 @@ require("dotenv").config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Use admin routes
+// app.use('/admin', adminRoutes);
+// app.use((err, req, res, next) => {
+//   console.error(err.stack);
+//   res.status(500).send('Something broke!');
+// });
 
 mongoose.connect(process.env.MONGODB_URL);
 const db = mongoose.connection;
@@ -47,39 +59,112 @@ function decrypt(encryptedMessage, encryptionMethod, secret, iv){
 }
 
 
-// Login route
+
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
-
+  
   try {
     // Find user by username
     const user = await UserModel.findOne({ name: username });
 
     // Check if user exists
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     // Compare passwords
     const isMatch = password === decrypt(user.password, encryptionMethod, key, iv);
 
     if (!isMatch) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials" });
+      return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
-    // User authenticated successfully
-    res.status(200).json({ success: true, message: "Login successful" });
+    // User authenticated successfully, generate JWT
+    const payload = { id: user._id };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // Store the token in the user's document
+    user.token = token;
+    await user.save();
+
+    res.status(200).json({ success: true, message: "Login successful", token });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
+
+
+    
+
 // API routes
+//generating excel file
+
+app.get('/generateExcel', async (req, res) => {
+  // Extract date range from query parameters
+  const from = req.query.from; // Example: '2024-06-01'
+  const to = req.query.to;     // Example: '2024-06-30'
+
+  // Example data (you can replace this with actual data retrieval based on the date range)
+  const exampleData = [
+    {
+      facultyName: 'John Doe',
+      dept: 'Computer Science',
+      subCode: 'CS101',
+      examName: 'Midterm Exam',
+      noOfDutiesCompleted: 5,
+      signature: ''
+    },
+    {
+      facultyName: 'Jane Smith',
+      dept: 'Mathematics',
+      subCode: 'MATH201',
+      examName: 'Final Exam',
+      noOfDutiesCompleted: 3,
+      signature: ''
+    }
+  ];
+
+  // Create a new workbook and add a worksheet
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Exam Duties');
+
+  // Add "Exam Details" in the first row
+  worksheet.addRow({ ExamDetails: `From ${from} to ${to}` });
+
+  // Add column headers
+  worksheet.columns = [
+    { header: 'Sl No', key: 'slNo', width: 10 },
+    { header: 'Faculty Name', key: 'facultyName', width: 20 },
+    { header: 'Department', key: 'dept', width: 20 },
+    { header: 'Subject Code', key: 'subCode', width: 15 },
+    { header: 'Exam Name', key: 'examName', width: 20 },
+    { header: 'No of Duties Completed', key: 'noOfDutiesCompleted', width: 20 },
+    { header: 'Signature', key: 'signature', width: 50 }
+  ];
+
+  // Add rows with the example data
+  exampleData.forEach((data, index) => {
+    worksheet.addRow({
+      slNo: index + 1,
+      facultyName: data.facultyName,
+      dept: data.dept,
+      subCode: data.subCode,
+      examName: data.examName,
+      noOfDutiesCompleted: data.noOfDutiesCompleted,
+      signature: data.signature
+    });
+  });
+
+  // Set headers for the response
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.setHeader('Content-Disposition', 'attachment; filename=exam_duties.xlsx');
+
+  // Write the workbook to the response
+  await workbook.xlsx.write(res);
+  res.end();
+});
 
 // Add faculty route with encryption
 // Add faculty route with encryption
@@ -160,9 +245,9 @@ app.delete("/deleteFaculty/:id", async (req, res) => {
 app.put("/updateFaculty/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email, password, dept } = req.body;
+    const { name, designation, password, dept } = req.body;
 
-    let updatedData = { name, email, dept };
+    let updatedData = { name, designation, dept };
 
     if (password) {
       const encryptedPassword = encrypt(password);
@@ -342,10 +427,14 @@ app.get("/assignedFaculty", async (req, res) => {
   }
 });
 //fetch faculty details
-app.get("/assignedFaculty/:facultyName", async (req, res) => {
+app.get("/assignedFaculty/me", passport.authenticate('jwt', { session: false }), async (req, res) => {
   try {
-    const facultyName = req.params.facultyName;
-    const assignments = await AssignmentModel.find({ facultyName })
+    if (!req.user) {
+      throw new Error('User not authenticated');
+    }
+    const facultyName = req.user.name; // Get the username from the authenticated user
+    // console.log("Authenticated user:", req.user); // Add this line for debugging
+    const assignments = await AssignmentModel.find({ facultyName: facultyName })
       .populate({
         path: "examDateId",
         select: ["_id", "examDate", "examName", "semester", "session"],
@@ -365,6 +454,243 @@ app.get("/assignedFaculty/:facultyName", async (req, res) => {
     });
   }
 });
+
+
+
+// Exchange duty route
+app.get("/exchangeDuty", passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    if (!req.user) {
+      throw new Error('User not authenticated');
+    }
+    const facultyName = req.user.name; // Get the username from the authenticated user
+    // console.log("Authenticated user:", req.user); // Add this line for debugging
+    const assignments = await AssignmentModel.find({ facultyName: facultyName })
+      .populate({
+        path: "examDateId",
+        select: ["_id", "examDate", "examName", "semester", "session"],
+      })
+      .populate({
+        path: "facultyId",
+        select: ["_id", "name"],
+      });
+
+    res.status(200).json(assignments);
+  } catch (error) {
+    console.error("Error fetching assigned duty data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching assigned duty data",
+      error: error.message,
+    });
+  }
+});
+
+// Route to handle duty exchange request
+// app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { session: false }), async (req, res) => {
+//   try {
+//     const { assignmentId } = req.params;
+//     const { exchangeDateId, exchangeFacultyId, exchangeSession } = req.body;
+//     const userId = req.user.id;
+
+//     const userAssignment = await AssignmentModel.findById(assignmentId);
+//     const exchangeAssignment = await AssignmentModel.findOne({
+//       facultyId: exchangeFacultyId,
+//       examDateId: exchangeDateId,
+//       session: exchangeSession,
+//     });
+
+//     if (!userAssignment || !exchangeAssignment) {
+//       return res.status(404).json({ message: 'Assignment not found' });
+//     }
+
+//     // Swap the assignments
+//     const tempDateId = userAssignment.examDateId;
+//     const tempFacultyId = userAssignment.facultyId;
+//     const tempSession = userAssignment.examDateId.session;
+
+//     userAssignment.examDateId = exchangeAssignment.examDateId;
+//     userAssignment.facultyId = exchangeAssignment.facultyId;
+//     userAssignment.examDateId.session = exchangeAssignment.session;
+
+//     exchangeAssignment.examDateId = tempDateId;
+//     exchangeAssignment.facultyId = tempFacultyId;
+//     exchangeAssignment.session = tempSession;
+
+//     await userAssignment.save();
+//     await exchangeAssignment.save();
+
+//     res.json({ message: 'Exchange successful' });
+//   } catch (err) {
+//     console.error('Failed to request exchange:', err);
+//     res.status(500).json({ message: 'Failed to request exchange', error: err.message });
+//   }
+// });
+
+
+
+
+
+app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    const { assignmentId } = req.params;
+    const { exchangeDateId, exchangeFacultyId, exchangeSession } = req.body;
+    const userId = req.user.id;
+
+    if (!mongoose.Types.ObjectId.isValid(assignmentId) || !mongoose.Types.ObjectId.isValid(exchangeDateId) || !mongoose.Types.ObjectId.isValid(exchangeFacultyId)) {
+      return res.status(400).json({ message: 'Invalid ID format' });
+    }
+
+    const userAssignment = await AssignmentModel.findById(assignmentId);
+    const exchangeAssignment = await AssignmentModel.findOne({
+      facultyId: exchangeFacultyId,
+      examDateId: exchangeDateId,
+      session: exchangeSession,
+    });
+
+    if (!userAssignment || !exchangeAssignment) {
+      return res.status(404).json({ message: 'Assignment not found' });
+    }
+
+    const exchangeRequest = new ExchangeRequest({
+      originalAssignment: userAssignment._id,
+      exchangeAssignment: exchangeAssignment._id,
+      exchangeDateId,
+      exchangeFacultyId,
+      exchangeSession,
+      status: 'Pending',
+    });
+
+    await exchangeRequest.save();
+
+    res.json({ message: 'Exchange request submitted successfully' });
+  } catch (err) {
+    console.error('Failed to request exchange:', err);
+    res.status(500).json({ message: 'Failed to request exchange', error: err.message });
+  }
+});
+
+
+
+// Get all exchange requests (for admin)
+app.get('/admin/exchangeRequestslist', async (req, res) => {
+  try {
+    const exchangeRequests = await ExchangeRequest.find()
+      .populate({
+        path: 'originalAssignment',
+        populate: {
+          path: 'examDateId',
+          select: ['_id', 'examDate', 'examName', 'session'],
+        },
+      })
+      .populate({
+        path: 'exchangeFacultyId',
+        select: ['_id', 'name'],
+      })
+      .populate({
+        path: 'exchangeDateId',
+      })
+      .exec();
+
+    // Filter out any requests with missing originalAssignment or examDateId
+    const filteredRequests = exchangeRequests.filter(request => request.originalAssignment && request.originalAssignment.examDateId);
+
+    res.json(filteredRequests);
+  } catch (error) {
+    console.error('Error fetching exchange requests:', error);
+    res.status(500).json({ message: 'Error fetching exchange requests', error: error.message });
+  }
+});
+
+app.put('/admin/approveExchangeRequest/:requestId', async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    const exchangeRequest = await ExchangeRequest.findById(requestId)
+      .populate('originalAssignment')
+      .populate('exchangeFacultyId')
+      .populate('exchangeDateId');
+
+    if (!exchangeRequest) {
+      return res.status(404).json({ message: 'Exchange request not found' });
+    }
+
+    // Get the original assignment and exchange faculty
+    const originalAssignment = exchangeRequest.originalAssignment;
+    const exchangeFaculty = exchangeRequest.exchangeFacultyId;
+    const exchangeDate = exchangeRequest.exchangeDateId;
+    const exchangeSession = exchangeRequest.exchangeSession;
+
+    // Find the exchange assignment
+    const exchangeAssignment = await AssignmentModel.findOne({ 
+      examDateId: exchangeDate._id, 
+      session: exchangeSession,
+      facultyId: exchangeFaculty._id
+    });
+
+    if (!exchangeAssignment) {
+      return res.status(404).json({ message: 'Exchange assignment not found' });
+    }
+
+    // Swap the faculty members
+    const originalFacultyId = originalAssignment.facultyId;
+    originalAssignment.facultyId = exchangeFaculty._id;
+    exchangeAssignment.facultyId = originalFacultyId;
+
+    // Save the changes
+    await originalAssignment.save();
+    await exchangeAssignment.save();
+
+    // Update the exchange request status
+    exchangeRequest.status = 'Approved';
+    await exchangeRequest.save();
+
+    res.json({ message: 'Exchange request approved successfully', data: exchangeRequest });
+  } catch (error) {
+    console.error('Error approving exchange request:', error);
+    res.status(500).json({ message: 'Error approving exchange request', error: error.message });
+  }
+});
+
+// Approve exchange request
+// app.put('/approveExchangeRequest/:requestId', async (req, res) => {
+//   try {
+//     const { requestId } = req.params;
+
+//     const exchangeRequest = await ExchangeRequest.findByIdAndUpdate(requestId, { status: 'Approved' }, { new: true });
+
+//     if (!exchangeRequest) {
+//       return res.status(404).json({ message: 'Exchange request not found' });
+//     }
+
+//     // Perform additional actions if needed (e.g., update assignments)
+
+//     res.json({ message: 'Exchange request approved successfully', data: exchangeRequest });
+//   } catch (error) {
+//     console.error('Error approving exchange request:', error);
+//     res.status(500).json({ message: 'Error approving exchange request', error: error.message });
+//   }
+// });
+
+// // Reject exchange request
+// app.put('/rejectExchangeRequest/:requestId', async (req, res) => {
+//   try {
+//     const { requestId } = req.params;
+
+//     const exchangeRequest = await ExchangeRequest.findByIdAndUpdate(requestId, { status: 'Rejected' }, { new: true });
+
+//     if (!exchangeRequest) {
+//       return res.status(404).json({ message: 'Exchange request not found' });
+//     }
+
+//     // Perform additional actions if needed
+
+//     res.json({ message: 'Exchange request rejected successfully', data: exchangeRequest });
+//   } catch (error) {
+//     console.error('Error rejecting exchange request:', error);
+//     res.status(500).json({ message: 'Error rejecting exchange request', error: error.message });
+//   }
+// });
+
 
 
 // Logout feature

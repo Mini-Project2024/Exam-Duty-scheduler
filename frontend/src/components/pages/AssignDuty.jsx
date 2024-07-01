@@ -16,7 +16,7 @@ const AssignDuty = () => {
           axios.get("http://localhost:3106/getExamDetails"),
           axios.get("http://localhost:3106/assignedFaculty"),
         ]);
-
+        console.log(assignedResponse)
       const facultyData = facultyResponse.data.filter(
         (faculty) => faculty.name.toLowerCase() !== "myadmin"
       );

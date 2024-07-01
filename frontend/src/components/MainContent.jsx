@@ -5,7 +5,8 @@ import FacultyDetails from "./pages/FacultyDetails";
 import AddFaculty from "./pages/AddFaculty";
 import AddExamDetails from "./pages/AddExamDetails";
 import UserDetails from "./pages/UserDetails";
-import ExchangeFaculty from "./pages/ExchangeFaculty";
+import ExchangeDuty from "./pages/ExchangeDuty";
+import AdminExchangeRequests from "./pages/AdminApproval";
 
 const MainContent = () => {
   return (
@@ -16,7 +17,8 @@ const MainContent = () => {
         <Route path="/addFaculty" element={<AddFaculty/>} />
         <Route path="/examDates" element={<AddExamDetails />} />
         <Route path="/DutyDetails" element={<UserDetails />} />
-        <Route path="/Exchange" element={<ExchangeFaculty />} />
+        <Route path="/exchangeDuty" element={<ExchangeDuty />} />
+        <Route path='/approveExchange' element={<AdminExchangeRequests/>}></Route>
       </Routes>
     </div>
   );

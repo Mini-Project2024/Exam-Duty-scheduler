@@ -4,7 +4,7 @@ import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import WorkHistoryIcon from '@mui/icons-material/WorkHistory';
-
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 export const SidebarData = [
     {
         title: "Assign Duty",
@@ -26,5 +26,9 @@ export const SidebarData = [
         icon: <EventAvailableIcon/>,
         link: "/main/examDates"
     },
-   
+    {
+        title:"Approve Exchanges",
+        icon:<FactCheckIcon/>,
+        link:"/main/approveExchange"
+    }
 ];
