@@ -112,7 +112,7 @@ function Index() {
       </div>
 
       <div
-        className={`fixed top-0 right-0 h-full w-1/4 bg-[#3572EF] p-8 transition-all ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-1/4 bg-[#072f6f] p-8 transition-all ease-in-out ${
           isLoginVisible ? "opacity-1 duration-300" : "opacity-0 duration-300"
         } z-50`}
         style={{ display: isLoginVisible ? "block" : "none" }}
