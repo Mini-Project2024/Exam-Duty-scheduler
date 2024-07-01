@@ -202,6 +202,7 @@ app.get('/generateExcel', async (req, res) => {
         acc[facultyId] = { 
           facultyName: assignment.facultyName,
           dept: assignment.facultyId.dept,
+          subjectName: [],
           subjectCodes: [],
           examNames: [],
           examDates: [],
@@ -228,12 +229,13 @@ app.get('/generateExcel', async (req, res) => {
       { header: 'Sl No', key: 'slNo', width: 10 },
       { header: 'Faculty Name', key: 'facultyName', width: 20 },
       { header: 'Department', key: 'dept', width: 20 },
+      { header: 'Subject Name', key: 'subjectName', width: 30 },
       { header: 'Subject Codes', key: 'subjectCodes', width: 30 },
       { header: 'Exam Name', key: 'examName', width: 20 },
       { header: 'Exam Date', key: 'examDate', width: 20 },
       { header: 'Session', key: 'session', width: 15 },
       { header: 'Semester', key: 'semester', width: 15 },
-      { header: 'Number of Duties', key: 'numberOfDuties', width: 15 },
+      { header: 'Number of Duties Completed', key: 'numberOfDuties', width: 15 },
       { header: 'Signature', key: 'signature', width: 30 }
     ];
 
@@ -427,9 +429,10 @@ app.post("/addExamdate", async (req, res) => {
 // Checking for existing exam
 app.get("/checkExamDate", async (req, res) => {
   try {
-    const { examDate, semester, session } = req.query;
+    const { examDate,subjectcode, semester, session } = req.query;
     const existingExam = await examDateModel.findOne({
       examDate,
+      subjectcode,
       semester,
       session,
     });
@@ -479,12 +482,12 @@ app.delete("/deleteExamDate/:id", async (req, res) => {
 app.put("/updateExamDate/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { examName, examDate, session } = req.body;
-    console.log("Updating exam details:", { id, examName, examDate, session });
+    const { examName,subjectcode,examDate, session } = req.body;
+    console.log("Updating exam details:", { id, examName,subjectcode, examDate, session });
 
     const updatedExam = await examDateModel.findByIdAndUpdate(
       id,
-      { examName, examDate, session },
+      { examName,subjectcode, examDate, session },
       { new: true }
     );
     await AssignmentModel.updateMany(
@@ -542,7 +545,7 @@ app.get("/assignedFaculty", async (req, res) => {
     const assignments = await AssignmentModel.find()
       .populate({
         path: "examDateId",
-        select: ["_id", "examDate", "examName", "semester", "session"],
+        select: ["_id", "examDate","subjectcode","examName", "semester", "session"],
       })
       .populate({
         path: "facultyId",
@@ -570,7 +573,7 @@ app.get("/assignedFaculty/me", passport.authenticate('jwt', { session: false }),
     const assignments = await AssignmentModel.find({ facultyName: facultyName })
       .populate({
         path: "examDateId",
-        select: ["_id", "examDate", "examName", "semester", "session"],
+        select: ["_id", "examDate","subjectcode","examName", "semester", "session"],
       })
       .populate({
         path: "facultyId",

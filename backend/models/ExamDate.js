@@ -5,6 +5,10 @@ const examDateSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  subjectcode: {
+    type: String,
+    required: true,
+  },
   examDate: {
     type: String,
     required: true,
