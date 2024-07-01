@@ -93,11 +93,6 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
-
-
-
-    
-
 // API routes
 //generating excel file
 
@@ -355,7 +350,6 @@ app.get("/faculty", async (req, res) => {
 app.delete("/deleteFaculty/:id", async (req, res) => {
   try {
     const { id } = req.params;
-
     // Delete the faculty member
     await UserModel.findByIdAndDelete(id);
 
