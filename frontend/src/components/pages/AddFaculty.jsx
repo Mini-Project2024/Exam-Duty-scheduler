@@ -9,7 +9,7 @@ const AddFaculty = () => {
   const [dept, setDept] = useState("CSE");
   const [message, setMessage] = useState("");
   const [designation, setDesignation] = useState("");
-  const [facultyData, setFacultyData] = useState([]);
+  const [facultyData, setFacultyData] = useState([]); 
   const [selectedFaculty, setSelectedFaculty] = useState(null);
 
   useEffect(() => {

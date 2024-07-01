@@ -1,10 +1,33 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import Box from "@mui/material/Box";
+import Modal from "@mui/material/Modal";
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+import Fab from "@mui/material/Fab";
+import TextField from "@mui/material/TextField";
+import DownloadForOfflineIcon from "@mui/icons-material/DownloadForOffline";
+import { saveAs } from 'file-saver';
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  boxShadow: 24,
+  borderRadius: 3,
+  p: 4,
+};
 
 const AssignDuty = () => {
   const [facultyList, setFacultyList] = useState([]);
   const [dates, setDates] = useState([]);
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [open, setOpen] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -14,7 +37,7 @@ const AssignDuty = () => {
           axios.get("http://localhost:3106/getExamDetails"),
           axios.get("http://localhost:3106/assignedFaculty"),
         ]);
-        console.log(assignedResponse)
+      
       const facultyData = facultyResponse.data.filter(
         (faculty) => faculty.name.toLowerCase() !== "myadmin"
       );
@@ -90,12 +113,12 @@ const AssignDuty = () => {
       }
       return false;
     });
-  
+
     if (isAlreadyAssigned) {
       toast.error("Faculty is already assigned to this date and session.");
       return;
     }
-    
+
     const updatedDates = [...dates];
     const assignedFacultyName = updatedDates[dateIndex].assignedFacultyName;
 
@@ -117,6 +140,29 @@ const AssignDuty = () => {
       toast.error("Error assigning duty");
     }
   };
+
+  const handleGenerateExcel = async () => {
+    try {
+      const response = await axios.get("http://localhost:3106/generateExcel", {
+        params: {
+          from: fromDate,
+          to: toDate,
+        },
+        responseType: 'blob', // Important: This ensures the response is treated as a blob
+      });
+
+      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, 'exam_duties.xlsx');
+      setOpen(false);
+      toast.success("Excel report generated successfully");
+    } catch (error) {
+      console.error("Error generating Excel:", error);
+      toast.error("Error generating Excel report");
+    }
+  };
+
+  const handleOpenModal = () => setOpen(true);
+  const handleCloseModal = () => setOpen(false);
 
   return (
     <section className="w-full h-full flex flex-col items-center p-4">
@@ -191,6 +237,58 @@ const AssignDuty = () => {
           ))}
         </tbody>
       </table>
+      
+      <div className="fixed bottom-4 right-4">
+        <Box sx={{ "& > :not(style)": { m: 1 } }}>
+          <Fab variant="extended" color="primary" onClick={handleOpenModal}>
+            <DownloadForOfflineIcon sx={{ mr: 1 }} />
+            Report
+          </Fab>
+        </Box>
+      </div>
+
+      <Modal
+        open={open}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Box display="flex" justifyContent="center" alignItems="center" sx={{marginBottom: 5}}>
+            <Typography
+              id="modal-modal-title"
+              variant="h6"
+              component="h2"
+              sx={{ fontWeight: "bold" }}
+            >
+              Select Date Range for Report
+            </Typography>
+          </Box>
+          <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+            <TextField
+              id="from-date"
+              label="From Date"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              sx={{ width: "48%" }}
+            />
+            <TextField
+              id="to-date"
+              label="To Date"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              sx={{ width: "48%" }}
+            />
+          </Box>
+          <Button variant="contained" sx={{ mt: 3 }} onClick={handleGenerateExcel} fullWidth>
+            Generate Excel Report
+          </Button>
+        </Box>
+      </Modal>
     </section>
   );
 };

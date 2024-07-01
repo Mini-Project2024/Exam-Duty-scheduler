@@ -101,70 +101,203 @@ app.post("/login", async (req, res) => {
 // API routes
 //generating excel file
 
+// app.get('/generateExcel', async (req, res) => {
+//   // Extract date range from query parameters
+//   const from = req.query.from; // Example: '2024-06-01'
+//   const to = req.query.to;     // Example: '2024-06-30'
+
+//   // Example data (you can replace this with actual data retrieval based on the date range)
+//   const exampleData = [
+//     {
+//       facultyName: 'John Doe',
+//       dept: 'Computer Science',
+//       subCode: 'CS101',
+//       examName: 'Midterm Exam',
+//       noOfDutiesCompleted: 5,
+//       signature: ''
+//     },
+//     {
+//       facultyName: 'Jane Smith',
+//       dept: 'Mathematics',
+//       subCode: 'MATH201',
+//       examName: 'Final Exam',
+//       noOfDutiesCompleted: 3,
+//       signature: ''
+//     }
+//   ];
+
+//   // Create a new workbook and add a worksheet
+//   const workbook = new ExcelJS.Workbook();
+//   const worksheet = workbook.addWorksheet('Exam Duties');
+
+//   // Add "Exam Details" in the first row
+//   worksheet.addRow({ ExamDetails: `From ${from} to ${to}` });
+
+//   // Add column headers
+//   worksheet.columns = [
+//     { header: 'Sl No', key: 'slNo', width: 10 },
+//     { header: 'Faculty Name', key: 'facultyName', width: 20 },
+//     { header: 'Department', key: 'dept', width: 20 },
+//     { header: 'Subject Code', key: 'subCode', width: 15 },
+//     { header: 'Exam Name', key: 'examName', width: 20 },
+//     { header: 'No of Duties Completed', key: 'noOfDutiesCompleted', width: 20 },
+//     { header: 'Signature', key: 'signature', width: 50 }
+//   ];
+
+//   // Add rows with the example data
+//   exampleData.forEach((data, index) => {
+//     worksheet.addRow({
+//       slNo: index + 1,
+//       facultyName: data.facultyName,
+//       dept: data.dept,
+//       subCode: data.subCode,
+//       examName: data.examName,
+//       noOfDutiesCompleted: data.noOfDutiesCompleted,
+//       signature: data.signature
+//     });
+//   });
+
+//   // Set headers for the response
+//   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+//   res.setHeader('Content-Disposition', 'attachment; filename=exam_duties.xlsx');
+
+//   // Write the workbook to the response
+//   await workbook.xlsx.write(res);
+//   res.end();
+// });
+
 app.get('/generateExcel', async (req, res) => {
-  // Extract date range from query parameters
-  const from = req.query.from; // Example: '2024-06-01'
-  const to = req.query.to;     // Example: '2024-06-30'
+  try {
+    const { from, to } = req.query;
 
-  // Example data (you can replace this with actual data retrieval based on the date range)
-  const exampleData = [
-    {
-      facultyName: 'John Doe',
-      dept: 'Computer Science',
-      subCode: 'CS101',
-      examName: 'Midterm Exam',
-      noOfDutiesCompleted: 5,
-      signature: ''
-    },
-    {
-      facultyName: 'Jane Smith',
-      dept: 'Mathematics',
-      subCode: 'MATH201',
-      examName: 'Final Exam',
-      noOfDutiesCompleted: 3,
-      signature: ''
+    // Validate if from and to dates are provided
+    if (!from || !to) {
+      return res.status(400).json({ success: false, message: 'From and To dates are required' });
     }
-  ];
 
-  // Create a new workbook and add a worksheet
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Exam Duties');
+    // Convert from and to dates to JavaScript Date objects
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
 
-  // Add "Exam Details" in the first row
-  worksheet.addRow({ ExamDetails: `From ${from} to ${to}` });
+    // Fetch assignments within the date range with examDate details
+    const assignments = await AssignmentModel.find().populate({
+      path: 'examDateId',
+      match: {
+        examDate: {
+          $gte: fromDate.toISOString().split('T')[0],
+          $lte: toDate.toISOString().split('T')[0]
+        }
+      }
+    }).populate('facultyId');
 
-  // Add column headers
-  worksheet.columns = [
-    { header: 'Sl No', key: 'slNo', width: 10 },
-    { header: 'Faculty Name', key: 'facultyName', width: 20 },
-    { header: 'Department', key: 'dept', width: 20 },
-    { header: 'Subject Code', key: 'subCode', width: 15 },
-    { header: 'Exam Name', key: 'examName', width: 20 },
-    { header: 'No of Duties Completed', key: 'noOfDutiesCompleted', width: 20 },
-    { header: 'Signature', key: 'signature', width: 50 }
-  ];
+    // Filter out assignments where examDateId is null (i.e., no matching examDate)
+    const filteredAssignments = assignments.filter(assignment => assignment.examDateId);
 
-  // Add rows with the example data
-  exampleData.forEach((data, index) => {
-    worksheet.addRow({
-      slNo: index + 1,
-      facultyName: data.facultyName,
-      dept: data.dept,
-      subCode: data.subCode,
-      examName: data.examName,
-      noOfDutiesCompleted: data.noOfDutiesCompleted,
-      signature: data.signature
+    // Group assignments by facultyId and consolidate work details
+    const assignmentCountByFaculty = filteredAssignments.reduce((acc, assignment) => {
+      const facultyId = assignment.facultyId?._id?.toString();
+      if (!facultyId) return acc;
+
+      if (!acc[facultyId]) {
+        acc[facultyId] = { 
+          facultyName: assignment.facultyName,
+          dept: assignment.facultyId.dept,
+          subjectCodes: [],
+          examNames: [],
+          examDates: [],
+          sessions: [],
+          semesters: [],
+          count: 0,
+        };
+      }
+      acc[facultyId].subjectCodes.push(assignment.subject);
+      acc[facultyId].examNames.push(assignment.examDateId.examName);
+      acc[facultyId].examDates.push(assignment.examDateId.examDate);
+      acc[facultyId].sessions.push(assignment.examDateId.session);
+      acc[facultyId].semesters.push(assignment.semester);
+      acc[facultyId].count += 1;
+      return acc;
+    }, {});
+
+    // Create Excel workbook
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Exam Duties');
+
+    // Add headers
+    worksheet.columns = [
+      { header: 'Sl No', key: 'slNo', width: 10 },
+      { header: 'Faculty Name', key: 'facultyName', width: 20 },
+      { header: 'Department', key: 'dept', width: 20 },
+      { header: 'Subject Codes', key: 'subjectCodes', width: 30 },
+      { header: 'Exam Name', key: 'examName', width: 20 },
+      { header: 'Exam Date', key: 'examDate', width: 20 },
+      { header: 'Session', key: 'session', width: 15 },
+      { header: 'Semester', key: 'semester', width: 15 },
+      { header: 'Number of Duties', key: 'numberOfDuties', width: 15 },
+      { header: 'Signature', key: 'signature', width: 30 }
+    ];
+
+    // Make the first row bold and slightly larger
+    const headerRow = worksheet.getRow(1);
+    headerRow.height = 20; // Set header row height
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true, size: 14 };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border = {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      };
     });
-  });
 
-  // Set headers for the response
-  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-  res.setHeader('Content-Disposition', 'attachment; filename=exam_duties.xlsx');
+    // Add rows with assignment data
+    let index = 1;
+    Object.values(assignmentCountByFaculty).forEach((assignment) => {
+      const row = worksheet.addRow({
+        slNo: index++,
+        facultyName: assignment.facultyName,
+        dept: assignment.dept,
+        subjectCodes: assignment.subjectCodes.join('\n'),
+        examName: assignment.examNames.join('\n'),
+        examDate: assignment.examDates.join('\n'),
+        session: assignment.sessions.join('\n'),
+        semester: assignment.semesters.join('\n'),
+        numberOfDuties: assignment.count,
+        signature: ''
+      });
 
-  // Write the workbook to the response
-  await workbook.xlsx.write(res);
-  res.end();
+      row.height = 40; // Set the same height for all data rows
+
+      // Set the alignment to wrap text and center-align, and add borders
+      row.eachCell({ includeEmpty: true }, (cell) => {
+        cell.alignment = { wrapText: true, vertical: 'top', horizontal: 'center' };
+        cell.border = {
+          top: { style: 'thin' },
+          left: { style: 'thin' },
+          bottom: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+      });
+    });
+
+    // Set headers for the response
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=exam_duties.xlsx');
+
+    // Write workbook to response
+    await workbook.xlsx.write(res);
+    res.end();
+
+  } catch (error) {
+    console.error('Error generating Excel:', error);
+    res.status(500).json({ success: false, message: 'Failed to generate Excel' });
+  }
 });
+
+
+
+
 
 // Add faculty route with encryption
 // Add faculty route with encryption
