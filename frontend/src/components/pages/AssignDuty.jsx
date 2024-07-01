@@ -5,6 +5,8 @@ import toast, { Toaster } from "react-hot-toast";
 const AssignDuty = () => {
   const [facultyList, setFacultyList] = useState([]);
   const [dates, setDates] = useState([]);
+  const [facultyAssignedDuty, setFacultyAssignedDuty] = useState({});
+
 
   const fetchData = async () => {
     try {
@@ -57,7 +59,19 @@ const AssignDuty = () => {
       toast.error("Failed to fetch data");
     }
   };
-
+  useEffect(() => {
+    const fetchFacultyAssignedDuty = async () => {
+      const facultyAssignedDutyData = {};
+      for (const faculty of facultyList) {
+        const response = await axios.get(`http://localhost:3106/assignedFaculty/${faculty.name}`);
+        const data = response.data;
+        facultyAssignedDutyData[faculty.name] = data.length > 0;
+      }
+      setFacultyAssignedDuty(facultyAssignedDutyData);
+    };
+    fetchFacultyAssignedDuty();
+  }, [facultyList]);
+  
   useEffect(() => {
     fetchData();
   }, []);
@@ -67,6 +81,9 @@ const AssignDuty = () => {
     const selectedFaculty = facultyList.find(
       (faculty) => faculty._id === event.target.value
     );
+
+    
+
     updatedDates[dateIndex].assignedFaculty = selectedFaculty._id;
     updatedDates[dateIndex].assignedFacultyName = selectedFaculty.name;
     setDates(updatedDates);
@@ -95,7 +112,7 @@ const AssignDuty = () => {
       toast.error("Faculty is already assigned to this date and session.");
       return;
     }
-    
+
     const updatedDates = [...dates];
     const assignedFacultyName = updatedDates[dateIndex].assignedFacultyName;
 
@@ -164,8 +181,8 @@ const AssignDuty = () => {
                     <>
                       <option value="">-- Select Faculty --</option>
                       {facultyList.map((faculty) => (
-                        <option key={faculty._id} value={faculty._id}>
-                          {faculty.name}
+                        <option key={faculty.name} value={faculty.name}>
+                          {faculty.name + (facultyAssignedDuty[faculty.name]? "" : " (No Duty)")}
                         </option>
                       ))}
                     </>
