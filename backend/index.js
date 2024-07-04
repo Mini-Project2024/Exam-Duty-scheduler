@@ -197,6 +197,7 @@ app.get('/generateExcel', async (req, res) => {
         acc[facultyId] = { 
           facultyName: assignment.facultyName,
           dept: assignment.facultyId.dept,
+          subjectName: [],
           subjectCodes: [],
           examNames: [],
           examDates: [],
@@ -223,12 +224,13 @@ app.get('/generateExcel', async (req, res) => {
       { header: 'Sl No', key: 'slNo', width: 10 },
       { header: 'Faculty Name', key: 'facultyName', width: 20 },
       { header: 'Department', key: 'dept', width: 20 },
+      { header: 'Subject Name', key: 'subjectName', width: 30 },
       { header: 'Subject Codes', key: 'subjectCodes', width: 30 },
       { header: 'Exam Name', key: 'examName', width: 20 },
       { header: 'Exam Date', key: 'examDate', width: 20 },
       { header: 'Session', key: 'session', width: 15 },
       { header: 'Semester', key: 'semester', width: 15 },
-      { header: 'Number of Duties', key: 'numberOfDuties', width: 15 },
+      { header: 'Number of Duties Completed', key: 'numberOfDuties', width: 15 },
       { header: 'Signature', key: 'signature', width: 30 }
     ];
 
@@ -421,9 +423,10 @@ app.post("/addExamdate", async (req, res) => {
 // Checking for existing exam
 app.get("/checkExamDate", async (req, res) => {
   try {
-    const { examDate, semester, session } = req.query;
+    const { examDate,subjectcode, semester, session } = req.query;
     const existingExam = await examDateModel.findOne({
       examDate,
+      subjectcode,
       semester,
       session,
     });
@@ -473,12 +476,12 @@ app.delete("/deleteExamDate/:id", async (req, res) => {
 app.put("/updateExamDate/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { examName, examDate, session } = req.body;
-    console.log("Updating exam details:", { id, examName, examDate, session });
+    const { examName,subjectcode,examDate, session } = req.body;
+    console.log("Updating exam details:", { id, examName,subjectcode, examDate, session });
 
     const updatedExam = await examDateModel.findByIdAndUpdate(
       id,
-      { examName, examDate, session },
+      { examName,subjectcode, examDate, session },
       { new: true }
     );
     await AssignmentModel.updateMany(
@@ -536,7 +539,7 @@ app.get("/assignedFaculty", async (req, res) => {
     const assignments = await AssignmentModel.find()
       .populate({
         path: "examDateId",
-        select: ["_id", "examDate", "examName", "semester", "session"],
+        select: ["_id", "examDate","subjectcode","examName", "semester", "session"],
       })
       .populate({
         path: "facultyId",
@@ -564,7 +567,7 @@ app.get("/assignedFaculty/me", passport.authenticate('jwt', { session: false }),
     const assignments = await AssignmentModel.find({ facultyName: facultyName })
       .populate({
         path: "examDateId",
-        select: ["_id", "examDate", "examName", "semester", "session"],
+        select: ["_id", "examDate","subjectcode","examName", "semester", "session"],
       })
       .populate({
         path: "facultyId",
@@ -582,6 +585,55 @@ app.get("/assignedFaculty/me", passport.authenticate('jwt', { session: false }),
   }
 });
 
+
+// ------------------------------------------- demo work ---------------------------------------------
+
+// New route to get distinct exam dates with faculties
+app.get('/distinctExamDates', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    const assignments = await AssignmentModel.find()
+      .populate({
+        path: 'examDateId',
+        select: ['_id', 'examDate', 'examName'],
+      })
+      .populate({
+        path: 'facultyId',
+        select: ['_id', 'name'],
+      });
+
+    // Group by examDateId and gather faculty names
+    const groupedByDate = assignments.reduce((acc, assignment) => {
+      const { examDateId, facultyId } = assignment;
+      const dateKey = examDateId._id;
+      if (!acc[dateKey]) {
+        acc[dateKey] = {
+          examDate: examDateId.examDate,
+          examName: examDateId.examName,
+          faculties: new Set(),
+        };
+      }
+      acc[dateKey].faculties.add(facultyId.name);
+      return acc;
+    }, {});
+
+    // Convert sets to arrays and remove duplicate dates
+    const distinctDates = Object.values(groupedByDate).map(item => ({
+      examDate: item.examDate,
+      examName: item.examName,
+      faculties: Array.from(item.faculties),
+    }));
+
+    res.json(distinctDates);
+  } catch (error) {
+    console.error('Error fetching distinct exam dates:', error);
+    res.status(500).json({ message: 'Error fetching distinct exam dates', error: error.message });
+  }
+});
+
+
+
+
+// ------------------------------------------------------------------------------------------------------
 
 
 // Exchange duty route

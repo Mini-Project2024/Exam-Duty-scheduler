@@ -95,6 +95,7 @@ const ExchangeDuty = () => {
         throw new Error('No token found');
       }
   
+  
       const response = await axios.post(`http://localhost:3106/requestExchange/${selectedAssignmentId}`, {
         exchangeDateId,
         exchangeFacultyId,
@@ -105,7 +106,9 @@ const ExchangeDuty = () => {
         }
       });
   
+  
       toast.success(response.data.message);
+  
   
       // Fetch updated assignments
       const updatedAssignments = await axios.get('http://localhost:3106/exchangeDuty', {
@@ -115,12 +118,14 @@ const ExchangeDuty = () => {
       });
       setAssignments(updatedAssignments.data);
   
+  
       setExchangeFormVisible(false);
     } catch (err) {
       console.error('Failed to request exchange:', err);
       toast.error('Failed to request exchange.');
     }
   };
+  
   
   const handleCancelExchange = () => {
     setExchangeFormVisible(false);

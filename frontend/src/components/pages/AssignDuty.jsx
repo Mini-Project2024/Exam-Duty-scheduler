@@ -174,6 +174,7 @@ const AssignDuty = () => {
           <tr>
             <th className="px-4 py-2 border border-gray-300">Date</th>
             <th className="px-4 py-2 border border-gray-300">Subject</th>
+            <th className="px-4 py-2 border border-gray-300">Subject Code</th>
             <th className="px-4 py-2 border border-gray-300">Semester</th>
             <th className="px-4 py-2 border border-gray-300">Session</th>
             <th className="px-4 py-2 border border-gray-300">Faculty</th>
@@ -192,6 +193,9 @@ const AssignDuty = () => {
               </td>
               <td className="px-4 py-2 border border-gray-300 text-center">
                 {dateObj.examName}
+              </td>
+              <td className="px-4 py-2 border border-gray-300 text-center">
+                {dateObj.subjectcode}
               </td>
               <td className="px-4 py-2 border border-gray-300 text-center">
                 {dateObj.semester}
