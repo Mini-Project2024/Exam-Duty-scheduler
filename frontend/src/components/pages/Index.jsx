@@ -8,6 +8,8 @@ import LoginIcon from "@mui/icons-material/Login";
 import backgroundImg from "../../images/CEC.jpg";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import logo2 from "../../images/Ammembal.png"
+import PersonIcon from '@mui/icons-material/Person';
+import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';import HttpsIcon from '@mui/icons-material/Https';
 
 function Index() {
   const [username, setUsername] = useState("");
@@ -112,20 +114,20 @@ function Index() {
       </div>
 
       <div
-        className={`fixed top-0 right-0 h-full w-1/4 bg-[#3572EF] p-8 transition-all ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-1/4 bg-[#fff] p-8 transition-all ease-in-out ${
           isLoginVisible ? "opacity-1 duration-300" : "opacity-0 duration-300"
         } z-50`}
         style={{ display: isLoginVisible ? "block" : "none" }}
       >
         <CloseRoundedIcon
-          className="absolute top-3 right-3 text-white cursor-pointer"
+          className="absolute top-3 right-3 text-black cursor-pointer"
           onClick={handleCloseLogin}
         />
-        <h1 className="text-4xl text-white font-bold mb-6">Login</h1>
+        <h1 className="text-4xl text-center text-black font-bold mb-6 ">Login</h1>
         <form onSubmit={handleSubmit} className="w-full space-y-6">
           <div className="flex flex-col">
-            <label htmlFor="username" className="text-white font-bold mb-2">
-              Username
+            <label htmlFor="username" className="text-black font-bold mb-2">
+              Username <PersonIcon/>
             </label>
             <input
               type="text"
@@ -137,8 +139,8 @@ function Index() {
             />
           </div>
           <div className="flex flex-col">
-            <label htmlFor="password" className="text-white font-bold mb-2">
-              Password
+            <label htmlFor="password" className="text-black font-bold mb-2">
+              Password <HttpsIcon/>
             </label>
             <input
               type="password"
