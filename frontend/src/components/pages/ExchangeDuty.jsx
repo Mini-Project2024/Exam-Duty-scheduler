@@ -64,7 +64,10 @@ const ExchangeDuty = () => {
     const selectedDateId = e.target.value;
     setExchangeDateId(selectedDateId);
 
-    const facultyForDate = assignedFaculty.filter(faculty => faculty.examDateId._id === selectedDateId);
+    const facultyForDate = assignedFaculty.filter(faculty => 
+      faculty.examDateId._id === selectedDateId && 
+      faculty.facultyId._id !== localStorage.getItem('facultyId')
+    );
     setAvailableFaculty(facultyForDate);
     setExchangeFacultyId('');
     setAvailableSessions([]);
@@ -73,6 +76,8 @@ const ExchangeDuty = () => {
   const handleFacultyChange = (e) => {
     const selectedFacultyId = e.target.value;
     setExchangeFacultyId(selectedFacultyId);
+    const loggedInFacultyId = localStorage.getItem('facultyId');
+    console.log(loggedInFacultyId)
 
     const sessionsForFaculty = assignedFaculty
       .filter(faculty => faculty.facultyId._id === selectedFacultyId && faculty.examDateId._id === exchangeDateId)
@@ -89,7 +94,8 @@ const ExchangeDuty = () => {
       if (!token) {
         throw new Error('No token found');
       }
-
+  
+  
       const response = await axios.post(`http://localhost:3106/requestExchange/${selectedAssignmentId}`, {
         exchangeDateId,
         exchangeFacultyId,
@@ -99,23 +105,28 @@ const ExchangeDuty = () => {
           Authorization: `Bearer ${token}`
         }
       });
-
+  
+  
       toast.success(response.data.message);
-
+  
+  
+      // Fetch updated assignments
       const updatedAssignments = await axios.get('http://localhost:3106/exchangeDuty', {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       setAssignments(updatedAssignments.data);
-
+  
+  
       setExchangeFormVisible(false);
     } catch (err) {
       console.error('Failed to request exchange:', err);
       toast.error('Failed to request exchange.');
     }
   };
-
+  
+  
   const handleCancelExchange = () => {
     setExchangeFormVisible(false);
   };

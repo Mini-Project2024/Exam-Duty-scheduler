@@ -5,12 +5,14 @@ import toast, { Toaster } from "react-hot-toast";
 const AddExamDetails = () => {
   const [examDetails, setExamDetails] = useState({
     examName: "",
+    subjectcode:"",
     examDate: "",
     session: "",
     semester: "",
   });
   const [message, setMessage] = useState("");
   const [examData, setExamData] = useState([]);
+  // const [subjectcode, setSubjectcode] = useState("");
   const [selectedExam, setSelectedExam] = useState(null);
   const [semesters] = useState(["1", "2", "3", "4", "5", "6", "7", "8"]);
 
@@ -27,6 +29,7 @@ const AddExamDetails = () => {
       const existingExam = await axios.get("http://localhost:3106/checkExamDate", {
         params: {
           examDate: examDetails.examDate,
+          subjectcode: examDetails.subjectcode, 
           semester: examDetails.semester,
           session: examDetails.session,
         },
@@ -51,7 +54,7 @@ const AddExamDetails = () => {
   };
 
   const resetForm = () => {
-    setExamDetails({ examName: "", examDate: "", session: "", semester: "" });
+    setExamDetails({ examName: "",subjectcode:"", examDate: "", session: "", semester: "" });
     setMessage("");
     setSelectedExam(null);
   };
@@ -80,6 +83,7 @@ const AddExamDetails = () => {
   const handleUpdate = (exam) => {
     setExamDetails({
       examName: exam.examName,
+      subjectcode: exam.subjectcode,
       examDate: exam.examDate,
       session: exam.session,
       semester: exam.semester,
@@ -129,6 +133,19 @@ const AddExamDetails = () => {
               type="text"
               name="examName"
               value={examDetails.examName}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+            />
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium text-gray-700">
+              Subject Code:
+            </label>
+            <input
+              type="text"
+              name="subjectcode"
+              value={examDetails.subjectcode}
               onChange={handleChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
@@ -200,6 +217,7 @@ const AddExamDetails = () => {
           <thead>
             <tr>
               <th className="px-4 py-2 border border-gray-300">Exam Name</th>
+              <th className="px-4 py-2 border border-gray-300">Subject Code</th>
               <th className="px-4 py-2 border border-gray-300">Exam Date</th>
               <th className="px-4 py-2 border border-gray-300">Session</th>
               <th className="px-4 py-2 border border-gray-300">Semester</th>
@@ -211,6 +229,9 @@ const AddExamDetails = () => {
               <tr key={exam._id}>
                 <td className="px-4 py-2 border border-gray-300 text-center">
                   {exam.examName}
+                </td>
+                <td className="px-4 py-2 border border-gray-300 text-center">
+                  {exam.subjectcode}
                 </td>
                 <td className="px-4 py-2 border border-gray-300 text-center">
                   {exam.examDate}
