@@ -4,6 +4,7 @@ import toast, { Toaster } from 'react-hot-toast';
 
 const ExchangeDuty = () => {
   const [assignments, setAssignments] = useState([]);
+ 
   const [assignedFaculty, setAssignedFaculty] = useState([]);
   const [availableFaculty, setAvailableFaculty] = useState([]);
   const [availableSessions, setAvailableSessions] = useState([]);
@@ -28,15 +29,16 @@ const ExchangeDuty = () => {
             Authorization: `Bearer ${token}`
           }
         });
-
+        console.log('Response data:', response.data);
         setAssignments(response.data);
+        setFacultyId(response.data.facultyId?._id);
         setLoading(false);
       } catch (err) {
         setError(err.message);
         setLoading(false);
       }
     };
-
+   
     const fetchAssignedFaculty = async () => {
       try {
         const response = await axios.get('http://localhost:3106/assignedFaculty', {
@@ -46,6 +48,7 @@ const ExchangeDuty = () => {
         });
 
         setAssignedFaculty(response.data);
+        
       } catch (err) {
         console.error('Failed to fetch assigned faculty', err);
       }
@@ -55,6 +58,8 @@ const ExchangeDuty = () => {
     fetchAssignedFaculty();
   }, []);
 
+  const [facultyId, setFacultyId] = useState(null);
+  console.log(facultyId)
   const handleExchangeRequest = (assignmentId) => {
     setSelectedAssignmentId(assignmentId);
     setExchangeFormVisible(true);
@@ -65,8 +70,7 @@ const ExchangeDuty = () => {
     setExchangeDateId(selectedDateId);
 
     const facultyForDate = assignedFaculty.filter(faculty => 
-      faculty.examDateId._id === selectedDateId && 
-      faculty.facultyId._id !== localStorage.getItem('facultyId')
+      faculty.examDateId._id === selectedDateId 
     );
     setAvailableFaculty(facultyForDate);
     setExchangeFacultyId('');
@@ -80,7 +84,8 @@ const ExchangeDuty = () => {
     console.log(loggedInFacultyId)
 
     const sessionsForFaculty = assignedFaculty
-      .filter(faculty => faculty.facultyId._id === selectedFacultyId && faculty.examDateId._id === exchangeDateId)
+      .filter(faculty => faculty.facultyId._id === selectedFacultyId && faculty.examDateId._id === exchangeDateId && faculty.facultyId._id !== facultyId
+    )
       .map(faculty => faculty.examDateId.session);
 
     setAvailableSessions(sessionsForFaculty);
