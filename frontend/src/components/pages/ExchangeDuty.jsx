@@ -29,9 +29,7 @@ const ExchangeDuty = () => {
             Authorization: `Bearer ${token}`
           }
         });
-        console.log('Response data:', response.data);
         setAssignments(response.data);
-        setFacultyId(response.data.facultyId?._id);
         setLoading(false);
       } catch (err) {
         setError(err.message);
