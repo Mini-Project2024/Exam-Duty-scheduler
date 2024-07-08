@@ -5,11 +5,11 @@ const cors = require("cors");
 const UserModel = require("./models/Users");
 const examDateModel = require("./models/ExamDate");
 const AssignmentModel = require("./models/Assign");
-const jwt = require('jsonwebtoken');
-const passport = require('./passport.config.js');
-const ExchangeRequest = require('./models/ExchangeReq.js');
-const adminRoutes = require('./adminRoutes.js');
-const ExcelJS = require('exceljs'); 
+const jwt = require("jsonwebtoken");
+const passport = require("./passport.config.js");
+const ExchangeRequest = require("./models/ExchangeReq.js");
+const adminRoutes = require("./adminRoutes.js");
+const ExcelJS = require("exceljs");
 // const path = require("path");
 // const fs = require("fs");
 // const { isValidNumber } = require("face-api.js");
@@ -33,24 +33,30 @@ db.once("open", () => {
   console.log("Connected to MongoDB");
 });
 
-var secret_key = 'fd85b494-aaaa';
+var secret_key = "fd85b494-aaaa";
 var secret_iv = "smslt";
-var encryptionMethod = 'AES-256-CBC';
-var key = Crypto.createHash('sha512').update(secret_key, 'utf-8').digest('hex').substr(0,32);
-var iv = Crypto.createHash('sha512').update(secret_iv, 'utf-8').digest('hex').substr(0,16);
+var encryptionMethod = "AES-256-CBC";
+var key = Crypto.createHash("sha512")
+  .update(secret_key, "utf-8")
+  .digest("hex")
+  .substr(0, 32);
+var iv = Crypto.createHash("sha512")
+  .update(secret_iv, "utf-8")
+  .digest("hex")
+  .substr(0, 16);
 
-function encrypt(plain_text, encryptionMethod, secret, iv){
+function encrypt(plain_text, encryptionMethod, secret, iv) {
   var encryptor = Crypto.createCipheriv(encryptionMethod, secret, iv);
-  var aes_encrypted = encryptor.update(plain_text, 'utf-8', 'base64');
-  aes_encrypted += encryptor.final('base64');
+  var aes_encrypted = encryptor.update(plain_text, "utf-8", "base64");
+  aes_encrypted += encryptor.final("base64");
   return aes_encrypted;
 }
 
-function decrypt(encryptedMessage, encryptionMethod, secret, iv){
+function decrypt(encryptedMessage, encryptionMethod, secret, iv) {
   try {
     let decryptor = Crypto.createDecipheriv(encryptionMethod, secret, iv);
-    let decrypted = decryptor.update(encryptedMessage, 'base64', 'utf8');
-    decrypted += decryptor.final('utf8');
+    let decrypted = decryptor.update(encryptedMessage, "base64", "utf8");
+    decrypted += decryptor.final("utf8");
     return decrypted;
   } catch (error) {
     console.error("Error decrypting:", error);
@@ -58,30 +64,35 @@ function decrypt(encryptedMessage, encryptionMethod, secret, iv){
   }
 }
 
-
-
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  
+
   try {
     // Find user by username
     const user = await UserModel.findOne({ name: username });
 
     // Check if user exists
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     // Compare passwords
-    const isMatch = password === decrypt(user.password, encryptionMethod, key, iv);
+    const isMatch =
+      password === decrypt(user.password, encryptionMethod, key, iv);
 
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: "Invalid credentials" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
     }
 
     // User authenticated successfully, generate JWT
     const payload = { id: user._id };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     // Store the token in the user's document
     user.token = token;
@@ -162,13 +173,143 @@ app.post("/login", async (req, res) => {
 //   res.end();
 // });
 
-app.get('/generateExcel', async (req, res) => {
+// app.get('/generateExcel', async (req, res) => {
+//   try {
+//     const { from, to } = req.query;
+
+//     // Validate if from and to dates are provided
+//     if (!from || !to) {
+//       return res.status(400).json({ success: false, message: 'From and To dates are required' });
+//     }
+
+//     // Convert from and to dates to JavaScript Date objects
+//     const fromDate = new Date(from);
+//     const toDate = new Date(to);
+
+//     // Fetch assignments within the date range with examDate details
+//     const assignments = await AssignmentModel.find().populate({
+//       path: 'examDateId',
+//       match: {
+//         examDate: {
+//           $gte: fromDate.toISOString().split('T')[0],
+//           $lte: toDate.toISOString().split('T')[0]
+//         }
+//       }
+//     }).populate('facultyId');
+
+//     // Filter out assignments where examDateId is null (i.e., no matching examDate)
+//     const filteredAssignments = assignments.filter(assignment => assignment.examDateId);
+
+//     // Group assignments by facultyId and consolidate work details
+//     const assignmentCountByFaculty = filteredAssignments.reduce((acc, assignment) => {
+//       const facultyId = assignment.facultyId?._id?.toString();
+//       if (!facultyId) return acc;
+
+//       if (!acc[facultyId]) {
+//         acc[facultyId] = {
+//           facultyName: assignment.facultyName,
+//           dept: assignment.facultyId.dept,
+//           subjectName: [],
+//           subjectCodes: [],
+//           examDates: [],
+//           sessions: [],
+//           semesters: [],
+//           count: 0,
+//         };
+//       }
+//       acc[facultyId].subjectCodes.push(assignment.subject);
+//       acc[facultyId].examNames.push(assignment.examDateId.examName);
+//       acc[facultyId].examDates.push(assignment.examDateId.examDate);
+//       acc[facultyId].sessions.push(assignment.examDateId.session);
+//       acc[facultyId].semesters.push(assignment.semester);
+//       acc[facultyId].count += 1;
+//       return acc;
+//     }, {});
+
+//     // Create Excel workbook
+//     const workbook = new ExcelJS.Workbook();
+//     const worksheet = workbook.addWorksheet('Exam Duties');
+
+//     // Add headers
+//     worksheet.columns = [
+//       { header: 'Sl No', key: 'slNo', width: 10 },
+//       { header: 'Faculty Name', key: 'facultyName', width: 20 },
+//       { header: 'Department', key: 'dept', width: 20 },
+//       { header: 'Subject Name', key: 'subjectName', width: 30 },
+//       { header: 'Subject Codes', key: 'subjectCodes', width: 30 },
+//       { header: 'Exam Date', key: 'examDate', width: 20 },
+//       { header: 'Session', key: 'session', width: 15 },
+//       { header: 'Semester', key: 'semester', width: 15 },
+//       { header: 'Number of Duties Completed', key: 'numberOfDuties', width: 30 },
+//       { header: 'Signature', key: 'signature', width: 30 }
+//     ];
+
+//     // Make the first row bold and slightly larger
+//     const headerRow = worksheet.getRow(1);
+//     headerRow.height = 20; // Set header row height
+//     headerRow.eachCell((cell) => {
+//       cell.font = { bold: true, size: 14 };
+//       cell.alignment = { vertical: 'middle', horizontal: 'center' };
+//       cell.border = {
+//         top: { style: 'thin' },
+//         left: { style: 'thin' },
+//         bottom: { style: 'thin' },
+//         right: { style: 'thin' }
+//       };
+//     });
+
+//     // Add rows with assignment data
+//     let index = 1;
+//     Object.values(assignmentCountByFaculty).forEach((assignment) => {
+//       const row = worksheet.addRow({
+//         slNo: index++,
+//         facultyName: assignment.facultyName,
+//         dept: assignment.dept,
+//         subjectCodes: assignment.subjectCodes.join('\n'),
+//         examDate: assignment.examDates.join('\n'),
+//         session: assignment.sessions.join('\n'),
+//         semester: assignment.semesters.join('\n'),
+//         numberOfDuties: assignment.count,
+//         signature: ''
+//       });
+
+//       row.height = 40; // Set the same height for all data rows
+
+//       // Set the alignment to wrap text and center-align, and add borders
+//       row.eachCell({ includeEmpty: true }, (cell) => {
+//         cell.alignment = { wrapText: true, vertical: 'top', horizontal: 'center' };
+//         cell.border = {
+//           top: { style: 'thin' },
+//           left: { style: 'thin' },
+//           bottom: { style: 'thin' },
+//           right: { style: 'thin' }
+//         };
+//       });
+//     });
+
+//     // Set headers for the response
+//     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+//     res.setHeader('Content-Disposition', 'attachment; filename=exam_duties.xlsx');
+
+//     // Write workbook to response
+//     await workbook.xlsx.write(res);
+//     res.end();
+
+//   } catch (error) {
+//     console.error('Error generating Excel:', error);
+//     res.status(500).json({ success: false, message: 'Failed to generate Excel' });
+//   }
+// });
+
+app.get("/generateExcel", async (req, res) => {
   try {
     const { from, to } = req.query;
 
     // Validate if from and to dates are provided
     if (!from || !to) {
-      return res.status(400).json({ success: false, message: 'From and To dates are required' });
+      return res
+        .status(400)
+        .json({ success: false, message: "From and To dates are required" });
     }
 
     // Convert from and to dates to JavaScript Date objects
@@ -176,63 +317,72 @@ app.get('/generateExcel', async (req, res) => {
     const toDate = new Date(to);
 
     // Fetch assignments within the date range with examDate details
-    const assignments = await AssignmentModel.find().populate({
-      path: 'examDateId',
-      match: {
-        examDate: {
-          $gte: fromDate.toISOString().split('T')[0],
-          $lte: toDate.toISOString().split('T')[0]
-        }
-      }
-    }).populate('facultyId');
+    const assignments = await AssignmentModel.find()
+      .populate({
+        path: "examDateId",
+        match: {
+          examDate: {
+            $gte: fromDate.toISOString().split("T")[0],
+            $lte: toDate.toISOString().split("T")[0],
+          },
+        },
+      })
+      .populate("facultyId");
 
     // Filter out assignments where examDateId is null (i.e., no matching examDate)
-    const filteredAssignments = assignments.filter(assignment => assignment.examDateId);
+    const filteredAssignments = assignments.filter(
+      (assignment) => assignment.examDateId
+    );
 
     // Group assignments by facultyId and consolidate work details
-    const assignmentCountByFaculty = filteredAssignments.reduce((acc, assignment) => {
-      const facultyId = assignment.facultyId?._id?.toString();
-      if (!facultyId) return acc;
+    const assignmentCountByFaculty = filteredAssignments.reduce(
+      (acc, assignment) => {
+        const facultyId = assignment.facultyId?._id?.toString();
+        if (!facultyId) return acc;
 
-      if (!acc[facultyId]) {
-        acc[facultyId] = { 
-          facultyName: assignment.facultyName,
-          dept: assignment.facultyId.dept,
-          subjectName: [],
-          subjectCodes: [],
-          examNames: [],
-          examDates: [],
-          sessions: [],
-          semesters: [],
-          count: 0,
-        };
-      }
-      acc[facultyId].subjectCodes.push(assignment.subject);
-      acc[facultyId].examNames.push(assignment.examDateId.examName);
-      acc[facultyId].examDates.push(assignment.examDateId.examDate);
-      acc[facultyId].sessions.push(assignment.examDateId.session);
-      acc[facultyId].semesters.push(assignment.semester);
-      acc[facultyId].count += 1;
-      return acc;
-    }, {});
+        if (!acc[facultyId]) {
+          acc[facultyId] = {
+            facultyName: assignment.facultyName,
+            dept: assignment.facultyId.dept,
+            subjectNames: [],
+            subjectCodes: [],
+            examDates: [],
+            sessions: [],
+            semesters: [],
+            count: 0,
+          };
+        }
+        acc[facultyId].subjectNames.push(assignment.subject);
+        acc[facultyId].subjectCodes.push(assignment.examDateId.subjectcode);
+        acc[facultyId].examDates.push(assignment.examDateId.examDate);
+        acc[facultyId].sessions.push(assignment.examDateId.session);
+        acc[facultyId].semesters.push(assignment.semester);
+        acc[facultyId].count += 1;
+        return acc;
+      },
+      {}
+    );
 
     // Create Excel workbook
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Exam Duties');
+    const worksheet = workbook.addWorksheet("Exam Duties");
 
     // Add headers
     worksheet.columns = [
-      { header: 'Sl No', key: 'slNo', width: 10 },
-      { header: 'Faculty Name', key: 'facultyName', width: 20 },
-      { header: 'Department', key: 'dept', width: 20 },
-      { header: 'Subject Name', key: 'subjectName', width: 30 },
-      { header: 'Subject Codes', key: 'subjectCodes', width: 30 },
-      { header: 'Exam Name', key: 'examName', width: 20 },
-      { header: 'Exam Date', key: 'examDate', width: 20 },
-      { header: 'Session', key: 'session', width: 15 },
-      { header: 'Semester', key: 'semester', width: 15 },
-      { header: 'Number of Duties Completed', key: 'numberOfDuties', width: 15 },
-      { header: 'Signature', key: 'signature', width: 30 }
+      { header: "Sl No", key: "slNo", width: 10 },
+      { header: "Faculty Name", key: "facultyName", width: 20 },
+      { header: "Department", key: "dept", width: 20 },
+      { header: "Subject Name", key: "subjectName", width: 30 },
+      { header: "Subject Codes", key: "subjectCodes", width: 30 },
+      { header: "Exam Date", key: "examDate", width: 20 },
+      { header: "Session", key: "session", width: 15 },
+      { header: "Semester", key: "semester", width: 15 },
+      {
+        header: "No. of Duties Completed",
+        key: "numberOfDuties",
+        width: 30,
+      },
+      { header: "Signature", key: "signature", width: 30 },
     ];
 
     // Make the first row bold and slightly larger
@@ -240,12 +390,12 @@ app.get('/generateExcel', async (req, res) => {
     headerRow.height = 20; // Set header row height
     headerRow.eachCell((cell) => {
       cell.font = { bold: true, size: 14 };
-      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.alignment = { vertical: "middle", horizontal: "center" };
       cell.border = {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' }
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
       };
     });
 
@@ -256,49 +406,54 @@ app.get('/generateExcel', async (req, res) => {
         slNo: index++,
         facultyName: assignment.facultyName,
         dept: assignment.dept,
-        subjectCodes: assignment.subjectCodes.join('\n'),
-        examName: assignment.examNames.join('\n'),
-        examDate: assignment.examDates.join('\n'),
-        session: assignment.sessions.join('\n'),
-        semester: assignment.semesters.join('\n'),
+        subjectName: assignment.subjectNames.join("\n"),
+        subjectCodes: assignment.subjectCodes.join("\n"),
+        examDate: assignment.examDates.join("\n"),
+        session: assignment.sessions.join("\n"),
+        semester: assignment.semesters.join("\n"),
         numberOfDuties: assignment.count,
-        signature: ''
+        signature: "",
       });
 
       row.height = 40; // Set the same height for all data rows
 
       // Set the alignment to wrap text and center-align, and add borders
       row.eachCell({ includeEmpty: true }, (cell) => {
-        cell.alignment = { wrapText: true, vertical: 'top', horizontal: 'center' };
+        cell.alignment = {
+          wrapText: true,
+          vertical: "top",
+          horizontal: "center",
+        };
         cell.border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' }
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
         };
       });
     });
 
     // Set headers for the response
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', 'attachment; filename=exam_duties.xlsx');
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=exam_duties.xlsx"
+    );
 
     // Write workbook to response
     await workbook.xlsx.write(res);
     res.end();
-
   } catch (error) {
-    console.error('Error generating Excel:', error);
-    res.status(500).json({ success: false, message: 'Failed to generate Excel' });
+    console.error("Error generating Excel:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to generate Excel" });
   }
 });
 
-
-
-
-
-// Add faculty route with encryption
-// Add faculty route with encryption
 app.post("/addFaculty", async (req, res) => {
   try {
     const { name, designation, password, dept } = req.body;
@@ -321,18 +476,21 @@ app.post("/addFaculty", async (req, res) => {
   }
 });
 
-
 // Fetch faculty with decryption
 app.get("/faculty", async (req, res) => {
   try {
     const facultyData = await UserModel.find();
 
     const decryptedFacultyData = facultyData.map((faculty) => {
-      
       const encryptedPassword = faculty.password;
 
       // Decrypt the password
-      const decryptedPassword = decrypt(encryptedPassword, encryptionMethod, key, iv);
+      const decryptedPassword = decrypt(
+        encryptedPassword,
+        encryptionMethod,
+        key,
+        iv
+      );
 
       return {
         ...faculty.toObject(),
@@ -359,7 +517,8 @@ app.delete("/deleteFaculty/:id", async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: "Faculty member and associated assignments deleted successfully.",
+      message:
+        "Faculty member and associated assignments deleted successfully.",
     });
   } catch (error) {
     console.error("Error deleting faculty member:", error);
@@ -369,7 +528,6 @@ app.delete("/deleteFaculty/:id", async (req, res) => {
     });
   }
 });
-
 
 // Update faculty member
 app.put("/updateFaculty/:id", async (req, res) => {
@@ -424,7 +582,7 @@ app.post("/addExamdate", async (req, res) => {
 // Checking for existing exam
 app.get("/checkExamDate", async (req, res) => {
   try {
-    const { examDate,subjectcode, semester, session } = req.query;
+    const { examDate, subjectcode, semester, session } = req.query;
     const existingExam = await examDateModel.findOne({
       examDate,
       subjectcode,
@@ -477,12 +635,18 @@ app.delete("/deleteExamDate/:id", async (req, res) => {
 app.put("/updateExamDate/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { examName,subjectcode,examDate, session } = req.body;
-    console.log("Updating exam details:", { id, examName,subjectcode, examDate, session });
+    const { examName, subjectcode, examDate, session } = req.body;
+    console.log("Updating exam details:", {
+      id,
+      examName,
+      subjectcode,
+      examDate,
+      session,
+    });
 
     const updatedExam = await examDateModel.findByIdAndUpdate(
       id,
-      { examName,subjectcode, examDate, session },
+      { examName, subjectcode, examDate, session },
       { new: true }
     );
     await AssignmentModel.updateMany(
@@ -514,7 +678,8 @@ app.put("/updateExamDate/:id", async (req, res) => {
 // Assign duty
 app.post("/assignDuty", async (req, res) => {
   try {
-    const { examDateId, facultyId, facultyName, session, semester, subject } = req.body;
+    const { examDateId, facultyId, facultyName, session, semester, subject } =
+      req.body;
 
     const newAssignment = new AssignmentModel({
       examDateId,
@@ -533,14 +698,20 @@ app.post("/assignDuty", async (req, res) => {
   }
 });
 
-
 // Fetch assigned data
 app.get("/assignedFaculty", async (req, res) => {
   try {
     const assignments = await AssignmentModel.find()
       .populate({
         path: "examDateId",
-        select: ["_id", "examDate","subjectcode","examName", "semester", "session"],
+        select: [
+          "_id",
+          "examDate",
+          "subjectcode",
+          "examName",
+          "semester",
+          "session",
+        ],
       })
       .populate({
         path: "facultyId",
@@ -558,113 +729,136 @@ app.get("/assignedFaculty", async (req, res) => {
   }
 });
 //fetch faculty details
-app.get("/assignedFaculty/me", passport.authenticate('jwt', { session: false }), async (req, res) => {
-  try {
-    if (!req.user) {
-      throw new Error('User not authenticated');
-    }
-    const facultyName = req.user.name; // Get the username from the authenticated user
-    // console.log("Authenticated user:", req.user); // Add this line for debugging
-    const assignments = await AssignmentModel.find({ facultyName: facultyName })
-      .populate({
-        path: "examDateId",
-        select: ["_id", "examDate","subjectcode","examName", "semester", "session"],
+app.get(
+  "/assignedFaculty/me",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      if (!req.user) {
+        throw new Error("User not authenticated");
+      }
+      const facultyName = req.user.name; // Get the username from the authenticated user
+      // console.log("Authenticated user:", req.user); // Add this line for debugging
+      const assignments = await AssignmentModel.find({
+        facultyName: facultyName,
       })
-      .populate({
-        path: "facultyId",
-        select: ["_id", "name"],
+        .populate({
+          path: "examDateId",
+          select: [
+            "_id",
+            "examDate",
+            "subjectcode",
+            "examName",
+            "semester",
+            "session",
+          ],
+        })
+        .populate({
+          path: "facultyId",
+          select: ["_id", "name"],
+        });
+
+      res.status(200).json(assignments);
+    } catch (error) {
+      console.error("Error fetching assigned duty data:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching assigned duty data",
+        error: error.message,
       });
-
-    res.status(200).json(assignments);
-  } catch (error) {
-    console.error("Error fetching assigned duty data:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching assigned duty data",
-      error: error.message,
-    });
+    }
   }
-});
-
+);
 
 // ------------------------------------------- demo work ---------------------------------------------
 
 // New route to get distinct exam dates with faculties
-app.get('/distinctExamDates', passport.authenticate('jwt', { session: false }), async (req, res) => {
-  try {
-    const assignments = await AssignmentModel.find()
-      .populate({
-        path: 'examDateId',
-        select: ['_id', 'examDate', 'examName'],
-      })
-      .populate({
-        path: 'facultyId',
-        select: ['_id', 'name'],
-      });
+app.get(
+  "/distinctExamDates",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const assignments = await AssignmentModel.find()
+        .populate({
+          path: "examDateId",
+          select: ["_id", "examDate", "examName"],
+        })
+        .populate({
+          path: "facultyId",
+          select: ["_id", "name"],
+        });
 
-    // Group by examDateId and gather faculty names
-    const groupedByDate = assignments.reduce((acc, assignment) => {
-      const { examDateId, facultyId } = assignment;
-      const dateKey = examDateId._id;
-      if (!acc[dateKey]) {
-        acc[dateKey] = {
-          examDate: examDateId.examDate,
-          examName: examDateId.examName,
-          faculties: new Set(),
-        };
-      }
-      acc[dateKey].faculties.add(facultyId.name);
-      return acc;
-    }, {});
+      // Group by examDateId and gather faculty names
+      const groupedByDate = assignments.reduce((acc, assignment) => {
+        const { examDateId, facultyId } = assignment;
+        const dateKey = examDateId._id;
+        if (!acc[dateKey]) {
+          acc[dateKey] = {
+            examDate: examDateId.examDate,
+            examName: examDateId.examName,
+            faculties: new Set(),
+          };
+        }
+        acc[dateKey].faculties.add(facultyId.name);
+        return acc;
+      }, {});
 
-    // Convert sets to arrays and remove duplicate dates
-    const distinctDates = Object.values(groupedByDate).map(item => ({
-      examDate: item.examDate,
-      examName: item.examName,
-      faculties: Array.from(item.faculties),
-    }));
+      // Convert sets to arrays and remove duplicate dates
+      const distinctDates = Object.values(groupedByDate).map((item) => ({
+        examDate: item.examDate,
+        examName: item.examName,
+        faculties: Array.from(item.faculties),
+      }));
 
-    res.json(distinctDates);
-  } catch (error) {
-    console.error('Error fetching distinct exam dates:', error);
-    res.status(500).json({ message: 'Error fetching distinct exam dates', error: error.message });
+      res.json(distinctDates);
+    } catch (error) {
+      console.error("Error fetching distinct exam dates:", error);
+      res
+        .status(500)
+        .json({
+          message: "Error fetching distinct exam dates",
+          error: error.message,
+        });
+    }
   }
-});
-
-
-
+);
 
 // ------------------------------------------------------------------------------------------------------
 
-
 // Exchange duty route
-app.get("/exchangeDuty", passport.authenticate('jwt', { session: false }), async (req, res) => {
-  try {
-    if (!req.user) {
-      throw new Error('User not authenticated');
-    }
-    const facultyName = req.user.name; // Get the username from the authenticated user
-    // console.log("Authenticated user:", req.user); // Add this line for debugging
-    const assignments = await AssignmentModel.find({ facultyName: facultyName })
-      .populate({
-        path: "examDateId",
-        select: ["_id", "examDate", "examName", "semester", "session"],
+app.get(
+  "/exchangeDuty",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      if (!req.user) {
+        throw new Error("User not authenticated");
+      }
+      const facultyName = req.user.name; // Get the username from the authenticated user
+      // console.log("Authenticated user:", req.user); // Add this line for debugging
+      const assignments = await AssignmentModel.find({
+        facultyName: facultyName,
       })
-      .populate({
-        path: "facultyId",
-        select: ["_id", "name"],
-      });
+        .populate({
+          path: "examDateId",
+          select: ["_id", "examDate", "examName", "semester", "session"],
+        })
+        .populate({
+          path: "facultyId",
+          select: ["_id", "name"],
+        });
 
-    res.status(200).json(assignments);
-  } catch (error) {
-    console.error("Error fetching assigned duty data:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching assigned duty data",
-      error: error.message,
-    });
+      res.status(200).json(assignments);
+    } catch (error) {
+      console.error("Error fetching assigned duty data:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching assigned duty data",
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 // Route to handle duty exchange request
 // app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { session: false }), async (req, res) => {
@@ -707,78 +901,91 @@ app.get("/exchangeDuty", passport.authenticate('jwt', { session: false }), async
 //   }
 // });
 
+app.post(
+  "/requestExchange/:assignmentId",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      const { assignmentId } = req.params;
+      const { exchangeDateId, exchangeFacultyId, exchangeSession } = req.body;
+      const userId = req.user.id;
 
+      // Ensure the IDs are valid ObjectId types
+      if (
+        !mongoose.Types.ObjectId.isValid(assignmentId) ||
+        !mongoose.Types.ObjectId.isValid(exchangeDateId) ||
+        !mongoose.Types.ObjectId.isValid(exchangeFacultyId)
+      ) {
+        return res.status(400).json({ message: "Invalid ID format" });
+      }
 
+      const userAssignment = await AssignmentModel.findById(assignmentId);
+      const exchangeAssignment = await AssignmentModel.findOne({
+        facultyId: exchangeFacultyId,
+        examDateId: exchangeDateId,
+        session: exchangeSession,
+      });
 
+      if (!userAssignment || !exchangeAssignment) {
+        return res.status(404).json({ message: "Assignment not found" });
+      }
 
-app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { session: false }), async (req, res) => {
-  try {
-    const { assignmentId } = req.params;
-    const { exchangeDateId, exchangeFacultyId, exchangeSession } = req.body;
-    const userId = req.user.id;
+      // Create exchange request
+      const exchangeRequest = new ExchangeRequest({
+        originalAssignment: userAssignment._id,
+        exchangeDateId,
+        exchangeFacultyId,
+        exchangeSession,
+        status: "Pending", // Initial status is pending
+      });
 
-    // Ensure the IDs are valid ObjectId types
-    if (!mongoose.Types.ObjectId.isValid(assignmentId) || !mongoose.Types.ObjectId.isValid(exchangeDateId) || !mongoose.Types.ObjectId.isValid(exchangeFacultyId)) {
-      return res.status(400).json({ message: 'Invalid ID format' });
+      await exchangeRequest.save();
+
+      res.json({ message: "Exchange request submitted successfully" });
+    } catch (err) {
+      console.error("Failed to request exchange:", err);
+      res
+        .status(500)
+        .json({ message: "Failed to request exchange", error: err.message });
     }
-
-    const userAssignment = await AssignmentModel.findById(assignmentId);
-    const exchangeAssignment = await AssignmentModel.findOne({
-      facultyId: exchangeFacultyId,
-      examDateId: exchangeDateId,
-      session: exchangeSession,
-    });
-
-    if (!userAssignment || !exchangeAssignment) {
-      return res.status(404).json({ message: 'Assignment not found' });
-    }
-
-    // Create exchange request
-    const exchangeRequest = new ExchangeRequest({
-      originalAssignment: userAssignment._id,
-      exchangeDateId,
-      exchangeFacultyId,
-      exchangeSession,
-      status: 'Pending', // Initial status is pending
-    });
-
-    await exchangeRequest.save();
-
-    res.json({ message: 'Exchange request submitted successfully' });
-  } catch (err) {
-    console.error('Failed to request exchange:', err);
-    res.status(500).json({ message: 'Failed to request exchange', error: err.message });
   }
-});
-
+);
 
 // Get all exchange requests (for admin)
-app.get('/admin/exchangeRequestslist', async (req, res) => {
+app.get("/admin/exchangeRequestslist", async (req, res) => {
   try {
     const exchangeRequests = await ExchangeRequest.find()
       .populate({
-        path: 'originalAssignment',
+        path: "originalAssignment",
         populate: {
-          path: 'examDateId',
-          select: ['_id', 'examDate', 'examName', 'session'],
+          path: "examDateId",
+          select: ["_id", "examDate", "examName", "session"],
         },
       })
       .populate({
-        path: 'exchangeFacultyId',
-        select: ['_id', 'name'],
+        path: "exchangeFacultyId",
+        select: ["_id", "name"],
       })
       .populate({
-        path: 'exchangeDateId',
+        path: "exchangeDateId",
       })
       .exec();
 
     // Filter out any requests with missing originalAssignment or examDateId
-    const filteredRequests = exchangeRequests.filter(request => request.originalAssignment && request.originalAssignment.examDateId);
+    const filteredRequests = exchangeRequests.filter(
+      (request) =>
+        request.originalAssignment && request.originalAssignment.examDateId
+    );
 
     res.json(filteredRequests);
   } catch (error) {
-    console.error('Error fetching exchange requests:', error);
-    res.status(500).json({ message: 'Error fetching exchange requests', error: error.message });
+    console.error("Error fetching exchange requests:", error);
+    res
+      .status(500)
+      .json({
+        message: "Error fetching exchange requests",
+        error: error.message,
+      });
   }
 });
 
@@ -792,30 +999,30 @@ const updateAssignmentFaculty = async (assignmentId, newFacultyId) => {
   return updatedAssignment;
 };
 
-app.put('/admin/approveExchangeRequest/:requestId', async (req, res) => {
+app.put("/admin/approveExchangeRequest/:requestId", async (req, res) => {
   try {
     const { requestId } = req.params;
 
     // Find the exchange request and populate the required fields
     const exchangeRequest = await ExchangeRequest.findById(requestId)
       .populate({
-        path: 'originalAssignment',
+        path: "originalAssignment",
         populate: {
-          path: 'facultyId',
-          model: 'examduty'
-        }
+          path: "facultyId",
+          model: "examduty",
+        },
       })
       .populate({
-        path: 'exchangeFacultyId',
-        model: 'examduty'
+        path: "exchangeFacultyId",
+        model: "examduty",
       })
       .populate({
-        path: 'exchangeDateId',
-        model: 'ExamDate'
+        path: "exchangeDateId",
+        model: "ExamDate",
       });
 
     if (!exchangeRequest) {
-      return res.status(404).json({ message: 'Exchange request not found' });
+      return res.status(404).json({ message: "Exchange request not found" });
     }
 
     // Extract the details from the exchange request
@@ -828,11 +1035,11 @@ app.put('/admin/approveExchangeRequest/:requestId', async (req, res) => {
     const exchangeAssignment = await AssignmentModel.findOne({
       examDateId: exchangeDate._id,
       session: exchangeSession,
-      facultyId: exchangeFaculty._id
+      facultyId: exchangeFaculty._id,
     });
 
     if (!exchangeAssignment) {
-      return res.status(404).json({ message: 'Exchange assignment not found' });
+      return res.status(404).json({ message: "Exchange assignment not found" });
     }
 
     // Temporary variables to store the faculty details
@@ -852,27 +1059,32 @@ app.put('/admin/approveExchangeRequest/:requestId', async (req, res) => {
     await exchangeAssignment.save();
 
     // Update the exchange request status to 'Approved'
-    exchangeRequest.status = 'Approved';
+    exchangeRequest.status = "Approved";
     await exchangeRequest.save();
 
-    res.json({ message: 'Exchange request approved successfully', data: exchangeRequest });
+    res.json({
+      message: "Exchange request approved successfully",
+      data: exchangeRequest,
+    });
   } catch (error) {
-    console.error('Error approving exchange request:', error);
+    console.error("Error approving exchange request:", error);
 
     const { requestId } = req.params;
     const exchangeRequest = await ExchangeRequest.findById(requestId);
 
-    if (exchangeRequest && exchangeRequest.status === 'Pending') {
-      exchangeRequest.status = 'Rejected';
+    if (exchangeRequest && exchangeRequest.status === "Pending") {
+      exchangeRequest.status = "Rejected";
       await exchangeRequest.save();
     }
 
-    res.status(500).json({ message: 'Error approving exchange request', error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error approving exchange request",
+        error: error.message,
+      });
   }
 });
-
-
-
 
 // Approve exchange request
 // app.put('/approveExchangeRequest/:requestId', async (req, res) => {
@@ -895,23 +1107,34 @@ app.put('/admin/approveExchangeRequest/:requestId', async (req, res) => {
 // });
 
 // // Reject exchange request
-app.put('/admin/rejectExchangeRequest/:requestId', async (req, res) => {
+app.put("/admin/rejectExchangeRequest/:requestId", async (req, res) => {
   try {
     const { requestId } = req.params;
 
-    const exchangeRequest = await ExchangeRequest.findByIdAndUpdate(requestId, { status: 'Rejected' }, { new: true });
+    const exchangeRequest = await ExchangeRequest.findByIdAndUpdate(
+      requestId,
+      { status: "Rejected" },
+      { new: true }
+    );
 
     if (!exchangeRequest) {
-      return res.status(404).json({ message: 'Exchange request not found' });
+      return res.status(404).json({ message: "Exchange request not found" });
     }
 
-    res.json({ message: 'Exchange request rejected successfully', data: exchangeRequest });
+    res.json({
+      message: "Exchange request rejected successfully",
+      data: exchangeRequest,
+    });
   } catch (error) {
-    console.error('Error rejecting exchange request:', error);
-    res.status(500).json({ message: 'Error rejecting exchange request', error: error.message });
+    console.error("Error rejecting exchange request:", error);
+    res
+      .status(500)
+      .json({
+        message: "Error rejecting exchange request",
+        error: error.message,
+      });
   }
 });
-
 
 // Logout feature
 app.post("/logout", (req, res) => {

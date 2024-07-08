@@ -86,11 +86,11 @@ function Index() {
 
         <div>
           <div className="flex flex-col justify-start items-start top-24 p-16 text-white w-full absolute z-40">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              SEMESTER END DUTY SCHEDULER
+            <h1 className="text-4xl md:text-4xl font-bold mb-4">
+              SEMESTER END DUTY EXAM SCHEDULER
             </h1>
             <h6 className="text-lg md:text-xl max-w-md">
-              Welcome to the Canara Semester End Duty Scheduler.
+              Welcome to the Canara Semester End Exam Duty Scheduler.
               <br />
               <br />
               <p className="text-lg">
