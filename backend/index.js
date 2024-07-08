@@ -96,9 +96,10 @@ app.post("/login", async (req, res) => {
 
     // Store the token in the user's document
     user.token = token;
+    user.name = username;
     await user.save();
-
-    res.status(200).json({ success: true, message: "Login successful", token });
+     
+    res.status(200).json({ success: true, message: "Login successful", token,username });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ success: false, message: "Internal server error" });

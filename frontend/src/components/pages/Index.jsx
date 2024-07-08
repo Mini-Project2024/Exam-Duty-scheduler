@@ -28,21 +28,22 @@ function Index() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
       // Send login request to backend
       const response = await axios.post("http://localhost:3106/login", {
         username,
         password,
       });
-
+  
       // Check if the login was successful
       if (response.data.success) {
-        // Store token in localStorage
+        // Store token and username in localStorage
         localStorage.setItem("token", response.data.token);
-
+        localStorage.setItem("username", response.data.username); // Assuming username is returned from backend
+  
         toast.success("User logged in successfully");
-
+  
         setTimeout(() => {
           if (username === "myadmin" && password === "admin123") {
             navigate("/main/assignduty");
@@ -59,6 +60,7 @@ function Index() {
       toast.error("Error during login");
     }
   };
+  
 
   return (
     <>
