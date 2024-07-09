@@ -368,14 +368,14 @@ app.get("/generateExcel", async (req, res) => {
 
     // Add headers
     worksheet.columns = [
-      { header: "Sl No", key: "slNo", width: 10 },
+      { header: "Sl No", key: "slNo", width: 8 },
       { header: "Faculty Name", key: "facultyName", width: 20 },
-      { header: "Department", key: "dept", width: 20 },
-      { header: "Subject Name", key: "subjectName", width: 30 },
-      { header: "Subject Codes", key: "subjectCodes", width: 30 },
+      { header: "Dept", key: "dept", width: 10 },
+      { header: "Subject Name", key: "subjectName", width: 20 },
+      { header: "Subject Codes", key: "subjectCodes", width: 20 },
       { header: "Exam Date", key: "examDate", width: 20 },
-      { header: "Session", key: "session", width: 15 },
-      { header: "Semester", key: "semester", width: 15 },
+      { header: "Session", key: "session", width: 12 },
+      { header: "Semester", key: "semester", width: 10 },
       {
         header: "No. of Duties Completed",
         key: "numberOfDuties",
