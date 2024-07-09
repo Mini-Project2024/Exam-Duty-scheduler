@@ -4,6 +4,7 @@ import toast, { Toaster } from 'react-hot-toast';
 
 const ExchangeDuty = () => {
   const [assignments, setAssignments] = useState([]);
+ 
   const [assignedFaculty, setAssignedFaculty] = useState([]);
   const [availableFaculty, setAvailableFaculty] = useState([]);
   const [availableSessions, setAvailableSessions] = useState([]);
@@ -28,7 +29,6 @@ const ExchangeDuty = () => {
             Authorization: `Bearer ${token}`
           }
         });
-
         setAssignments(response.data);
         setLoading(false);
       } catch (err) {
@@ -36,7 +36,7 @@ const ExchangeDuty = () => {
         setLoading(false);
       }
     };
-
+   
     const fetchAssignedFaculty = async () => {
       try {
         const response = await axios.get('http://localhost:3106/assignedFaculty', {
@@ -46,6 +46,7 @@ const ExchangeDuty = () => {
         });
 
         setAssignedFaculty(response.data);
+        
       } catch (err) {
         console.error('Failed to fetch assigned faculty', err);
       }
@@ -55,6 +56,8 @@ const ExchangeDuty = () => {
     fetchAssignedFaculty();
   }, []);
 
+  const [facultyId, setFacultyId] = useState(null);
+  console.log(facultyId)
   const handleExchangeRequest = (assignmentId) => {
     setSelectedAssignmentId(assignmentId);
     setExchangeFormVisible(true);
@@ -66,7 +69,7 @@ const ExchangeDuty = () => {
 
     const facultyForDate = assignedFaculty.filter(faculty => 
       faculty.examDateId._id === selectedDateId && 
-      faculty.facultyId._id !== localStorage.getItem('facultyId')
+      faculty.facultyId._id !== localStorage.getItem('username')
     );
     setAvailableFaculty(facultyForDate);
     setExchangeFacultyId('');
@@ -76,17 +79,18 @@ const ExchangeDuty = () => {
   const handleFacultyChange = (e) => {
     const selectedFacultyId = e.target.value;
     setExchangeFacultyId(selectedFacultyId);
-    const loggedInFacultyId = localStorage.getItem('facultyId');
-    console.log(loggedInFacultyId)
+    const loggedInFacultyId = localStorage.getItem('username');
+    
 
     const sessionsForFaculty = assignedFaculty
-      .filter(faculty => faculty.facultyId._id === selectedFacultyId && faculty.examDateId._id === exchangeDateId)
+      .filter(faculty => faculty.facultyId._id === selectedFacultyId && faculty.examDateId._id === exchangeDateId 
+        && faculty.facultyId._id!==loggedInFacultyId
+      )
       .map(faculty => faculty.examDateId.session);
 
     setAvailableSessions(sessionsForFaculty);
     setExchangeSession('');
   };
-
   const handleSubmitExchange = async (event) => {
     event.preventDefault();
     try {
@@ -94,8 +98,7 @@ const ExchangeDuty = () => {
       if (!token) {
         throw new Error('No token found');
       }
-  
-  
+
       const response = await axios.post(`http://localhost:3106/requestExchange/${selectedAssignmentId}`, {
         exchangeDateId,
         exchangeFacultyId,
@@ -105,28 +108,24 @@ const ExchangeDuty = () => {
           Authorization: `Bearer ${token}`
         }
       });
-  
-  
-      toast.success(response.data.message);
-  
-  
+     toast.success(response.data.message);
+
       // Fetch updated assignments
+
       const updatedAssignments = await axios.get('http://localhost:3106/exchangeDuty', {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       setAssignments(updatedAssignments.data);
-  
-  
+
       setExchangeFormVisible(false);
     } catch (err) {
       console.error('Failed to request exchange:', err);
       toast.error('Failed to request exchange.');
     }
   };
-  
-  
+
   const handleCancelExchange = () => {
     setExchangeFormVisible(false);
   };
