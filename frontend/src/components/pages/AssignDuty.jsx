@@ -23,12 +23,17 @@ const style = {
 };
 
 const AssignDuty = () => {
+  // const [departments, setDepartments] = useState([]);
   const [facultyList, setFacultyList] = useState([]);
   const [dates, setDates] = useState([]);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [open, setOpen] = useState(false);
+  const [selectedDepartments, setSelectedDepartments] = useState({});
 
+  const [departments, setDepartments] = useState([]);
+  const [facultyByDept, setFacultyByDept] = useState({});
+  
   const fetchData = async () => {
     try {
       const [facultyResponse, datesResponse, assignedResponse] =
@@ -37,14 +42,29 @@ const AssignDuty = () => {
           axios.get("http://localhost:3106/getExamDetails"),
           axios.get("http://localhost:3106/assignedFaculty"),
         ]);
-      
+  
       const facultyData = facultyResponse.data.filter(
         (faculty) => faculty.name.toLowerCase() !== "myadmin"
       );
+  
+      const deptSet = new Set();
+      const facultyByDeptObj = {};
+  
+      facultyData.forEach((faculty) => {
+        const { dept, name } = faculty;
+        deptSet.add(dept);
+        if (!facultyByDeptObj[dept]) {
+          facultyByDeptObj[dept] = [];
+        }
+        facultyByDeptObj[dept].push({ name, _id: faculty._id });
+      });
+  
+      setDepartments(Array.from(deptSet));
+      setFacultyByDept(facultyByDeptObj);
       setFacultyList(facultyData);
-
+  
       const assignedFaculty = assignedResponse.data;
-
+  
       const examDetails = datesResponse.data.map((exam) => {
         const assignment = assignedFaculty.find(
           (assign) =>
@@ -52,38 +72,50 @@ const AssignDuty = () => {
             assign.examDateId._id === exam._id &&
             assign.session === exam.session
         );
-
+  
         if (assignment) {
           const faculty = facultyData.find(
             (faculty) => faculty._id === assignment.facultyId._id
           );
+          const department = faculty.dept; // Add this line to get the department
           return {
             ...exam,
             assignedFaculty: assignment.facultyId._id,
             assignedFacultyName: faculty ? faculty.name : "",
+            assignedDepartment: department, // Add this line to include the department
             assigned: true,
           };
         } else {
           return {
             ...exam,
             assignedFaculty: "",
+            assignedFacultyName: "",
+            assignedDepartment: "", // Add this line to include the department
             assigned: false,
           };
         }
       });
-
+  
       examDetails.sort((a, b) => b.semester - a.semester);
-
+  
       setDates(examDetails);
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to fetch data");
     }
   };
-
+  
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleDepartmentChange = (event, dateIndex) => {
+    const selectedDepartment = event.target.value;
+    setSelectedDepartments((prevDepartments) => ({...prevDepartments, [dateIndex]: selectedDepartment }));
+    if (dates[dateIndex].assigned) {
+      setSelectedDepartments((prevDepartments) => ({...prevDepartments, [dateIndex]: dates[dateIndex].assignedDepartment }));
+    }
+  };
 
   const handleFacultyChange = (event, dateIndex) => {
     const updatedDates = [...dates];
@@ -94,6 +126,7 @@ const AssignDuty = () => {
     updatedDates[dateIndex].assignedFacultyName = selectedFaculty.name;
     setDates(updatedDates);
   };
+  // const filteredFaculty = selectedDepartments && faculty[selectedDepartments];
 
   const handleAssign = async (dateIndex) => {
     const selectedFacultyForDate = dates[dateIndex].assignedFaculty;
@@ -104,11 +137,12 @@ const AssignDuty = () => {
     }
 
     const isAlreadyAssigned = dates.some((date, index) => {
-      if (index !== dateIndex) {
+      if (index!== dateIndex) {
         return (
           date.assignedFaculty === selectedFacultyForDate &&
           date.examDate === dates[dateIndex].examDate &&
-          date.session === dates[dateIndex].session
+          date.session === dates[dateIndex].session &&
+          date.dept === dates[dateIndex].dept
         );
       }
       return false;
@@ -204,28 +238,42 @@ const AssignDuty = () => {
                 {dateObj.session}
               </td>
               <td className="px-4 py-2 border border-gray-300 text-center">
-                <select
-                  id={`faculty-${index}`}
-                  value={dateObj.assignedFaculty}
-                  onChange={(event) => handleFacultyChange(event, index)}
-                  disabled={dateObj.assigned}
-                >
-                  {!dateObj.assigned ? (
-                    <>
-                      <option value="">-- Select Faculty --</option>
-                      {facultyList.map((faculty) => (
-                        <option key={faculty._id} value={faculty._id}>
-                          {faculty.name}
-                        </option>
-                      ))}
-                    </>
-                  ) : (
-                    <option value={dateObj.assignedFaculty} disabled>
-                      {dateObj.assignedFacultyName}
-                    </option>
-                  )}
-                </select>
-              </td>
+  {dateObj.assigned? (
+    <span>
+      Department: {dateObj.assignedDepartment} <br />
+      Faculty: {dateObj.assignedFacultyName}
+    </span>
+  ) : (
+    <>
+      <select
+        value={selectedDepartments[index] || ""}
+        onChange={(event) => handleDepartmentChange(event, index)}
+        disabled={dateObj.assigned}
+      >
+        <option value="">Select Department</option>
+        {departments.map((department) => (
+          <option key={department} value={department}>
+            {department}
+          </option>
+        ))}
+      </select>
+      {selectedDepartments[index] && (
+        <select
+          value={dateObj.assignedFaculty}
+          onChange={(event) => handleFacultyChange(event, index)}
+          disabled={dateObj.assigned}
+        >
+          <option value="">Select Faculty (within {selectedDepartments[index]})</option>
+          {facultyByDept[selectedDepartments[index]].map((faculty) => (
+            <option key={faculty._id} value={faculty._id}>
+              {faculty.name}
+            </option>
+          ))}
+        </select>
+      )}
+    </>
+  )}
+</td>
               <td className="px-4 py-2 border border-gray-300 text-center">
                 <button
                   className={`text-${dateObj.assigned ? "blue" : "gray"}-500 ${
@@ -234,14 +282,13 @@ const AssignDuty = () => {
                   onClick={() => handleAssign(index)}
                   disabled={!dateObj.assignedFaculty || dateObj.assigned}
                 >
-                  {dateObj.assigned ? `Assigned` : "Assign"}
+                  {dateObj.assigned ? "Assigned" : "Assign"}
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      
       <div className="fixed bottom-4 right-4">
         <Box sx={{ "& > :not(style)": { m: 1 } }}>
           <Fab variant="extended" color="primary" onClick={handleOpenModal}>

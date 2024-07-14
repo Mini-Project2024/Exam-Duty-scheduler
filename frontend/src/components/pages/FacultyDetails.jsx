@@ -107,6 +107,8 @@ const FacultyDetails = () => {
               <tr>
                 <th className='px-4 py-2 border border-gray-300'>Semester</th>
                 <th className='px-4 py-2 border border-gray-300'>Exam Date</th>
+                <th className='px-4 py-2 border border-gray-300'>Subject Code</th>
+                <th className='px-4 py-2 border border-gray-300'>Subject Name</th>
                 <th className='px-4 py-2 border border-gray-300'>Session</th>
               </tr>
             </thead>
@@ -115,6 +117,8 @@ const FacultyDetails = () => {
                 <tr key={index}>
                   <td className='px-4 py-2 border border-gray-300 text-center'>{entry.examDateId.semester}</td>
                   <td className='px-4 py-2 border border-gray-300 text-center'>{entry.examDateId.examDate}</td>
+                  <td className='px-4 py-2 border border-gray-300 text-center'>{entry.examDateId.subjectcode}</td>
+                  <td className='px-4 py-2 border border-gray-300 text-center'>{entry.examDateId.examName}</td>
                   <td className='px-4 py-2 border border-gray-300 text-center'>{entry.examDateId.session}</td>
                 </tr>
               ))}

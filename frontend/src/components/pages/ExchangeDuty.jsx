@@ -4,6 +4,7 @@ import toast, { Toaster } from 'react-hot-toast';
 
 const ExchangeDuty = () => {
   const [assignments, setAssignments] = useState([]);
+ 
   const [assignedFaculty, setAssignedFaculty] = useState([]);
   const [availableFaculty, setAvailableFaculty] = useState([]);
   const [availableSessions, setAvailableSessions] = useState([]);
@@ -29,7 +30,6 @@ const ExchangeDuty = () => {
             Authorization: `Bearer ${token}`
           }
         });
-
         setAssignments(response.data);
         setLoading(false);
       } catch (err) {
@@ -37,7 +37,7 @@ const ExchangeDuty = () => {
         setLoading(false);
       }
     };
-
+   
     const fetchAssignedFaculty = async () => {
       try {
         const response = await axios.get('http://localhost:3106/assignedFaculty', {
@@ -47,6 +47,7 @@ const ExchangeDuty = () => {
         });
 
         setAssignedFaculty(response.data);
+        
       } catch (err) {
         console.error('Failed to fetch assigned faculty', err);
       }
@@ -56,6 +57,8 @@ const ExchangeDuty = () => {
     fetchAssignedFaculty();
   }, []);
 
+  const [facultyId, setFacultyId] = useState(null);
+  console.log(facultyId)
   const handleExchangeRequest = (assignmentId) => {
     setSelectedAssignmentId(assignmentId);
     const selectedAssignment = assignments.find(assignment => assignment._id === assignmentId);

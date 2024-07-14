@@ -6,7 +6,7 @@ const AddFaculty = () => {
   const [name, setName] = useState("");
   // const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [dept, setDept] = useState("CSE");
+  const [dept, setDept] = useState("CS");
   const [message, setMessage] = useState("");
   const [designation, setDesignation] = useState("");
   const [facultyData, setFacultyData] = useState([]); 
@@ -167,7 +167,7 @@ const AddFaculty = () => {
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
             >
-              <option value="CSE">CSE</option>
+              <option value="CS">CS</option>
               <option value="IS">IS</option>
               <option value="AIML">AIML</option>
               <option value="CSD">CSD</option>
