@@ -14,6 +14,7 @@ const ExchangeDuty = () => {
   const [exchangeFacultyId, setExchangeFacultyId] = useState('');
   const [exchangeSession, setExchangeSession] = useState('');
   const [selectedAssignmentId, setSelectedAssignmentId] = useState('');
+  const [selectedAssignmentDate, setSelectedAssignmentDate] = useState('');
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -57,6 +58,8 @@ const ExchangeDuty = () => {
 
   const handleExchangeRequest = (assignmentId) => {
     setSelectedAssignmentId(assignmentId);
+    const selectedAssignment = assignments.find(assignment => assignment._id === assignmentId);
+    setSelectedAssignmentDate(selectedAssignment.examDateId.examDate);
     setExchangeFormVisible(true);
   };
 
@@ -65,8 +68,7 @@ const ExchangeDuty = () => {
     setExchangeDateId(selectedDateId);
 
     const facultyForDate = assignedFaculty.filter(faculty => 
-      faculty.examDateId._id === selectedDateId && 
-      faculty.facultyId._id !== localStorage.getItem('username')
+      faculty.examDateId._id === selectedDateId 
     );
     setAvailableFaculty(facultyForDate);
     setExchangeFacultyId('');
@@ -76,18 +78,17 @@ const ExchangeDuty = () => {
   const handleFacultyChange = (e) => {
     const selectedFacultyId = e.target.value;
     setExchangeFacultyId(selectedFacultyId);
-    const loggedInFacultyId = localStorage.getItem('username');
-    
 
     const sessionsForFaculty = assignedFaculty
       .filter(faculty => faculty.facultyId._id === selectedFacultyId && faculty.examDateId._id === exchangeDateId 
-        && faculty.facultyId._id!==loggedInFacultyId
+        && faculty.facultyId._id !== selectedAssignmentId
       )
       .map(faculty => faculty.examDateId.session);
 
     setAvailableSessions(sessionsForFaculty);
     setExchangeSession('');
   };
+
   const handleSubmitExchange = async (event) => {
     event.preventDefault();
     try {
@@ -105,10 +106,9 @@ const ExchangeDuty = () => {
           Authorization: `Bearer ${token}`
         }
       });
-     toast.success(response.data.message);
+      toast.success(response.data.message);
 
       // Fetch updated assignments
-
       const updatedAssignments = await axios.get('http://localhost:3106/exchangeDuty', {
         headers: {
           Authorization: `Bearer ${token}`
@@ -129,6 +129,12 @@ const ExchangeDuty = () => {
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
+
+  // Extract unique dates from assignedFaculty
+  const uniqueDates = Array.from(new Set(assignedFaculty
+    .filter(faculty => faculty.examDateId.examDate !== selectedAssignmentDate)
+    .map(faculty => JSON.stringify({ id: faculty.examDateId._id, date: faculty.examDateId.examDate }))
+  )).map(dateString => JSON.parse(dateString));
 
   return (
     <div className="container mx-auto px-4">
@@ -201,9 +207,9 @@ const ExchangeDuty = () => {
                 required
               >
                 <option value="">Select Date</option>
-                {assignedFaculty.map(faculty => (
-                  <option key={faculty.examDateId._id} value={faculty.examDateId._id}>
-                    {faculty.examDateId.examDate}
+                {uniqueDates.map(({ id, date }) => (
+                  <option key={id} value={id}>
+                    {date}
                   </option>
                 ))}
               </select>
@@ -244,17 +250,17 @@ const ExchangeDuty = () => {
                 ))}
               </select>
             </div>
-            <div className="mt-4 flex justify-end space-x-2">
+            <div className="flex justify-end">
               <button
                 type="button"
-                className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 focus:outline-none focus:ring focus:ring-gray-300"
+                className="bg-gray-500 text-white px-4 py-2 rounded-md mr-2 hover:bg-gray-600 focus:outline-none focus:ring focus:ring-gray-300"
                 onClick={handleCancelExchange}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
               >
                 Submit Exchange
               </button>

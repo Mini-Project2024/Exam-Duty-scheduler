@@ -10,10 +10,10 @@ const assignmentSchema = new mongoose.Schema({
     ref: 'examduty',
     required: true,
   },
-  facultyName: {
-    type: String,
-    required: true,
-  },
+  // facultyName: {
+  //   type: String,
+  //   required: true,
+  // },
   session: String,
   semester: String,
   subject: String,
