@@ -4,7 +4,6 @@ import toast, { Toaster } from 'react-hot-toast';
 
 const ExchangeDuty = () => {
   const [assignments, setAssignments] = useState([]);
- 
   const [assignedFaculty, setAssignedFaculty] = useState([]);
   const [availableFaculty, setAvailableFaculty] = useState([]);
   const [availableSessions, setAvailableSessions] = useState([]);
@@ -30,6 +29,7 @@ const ExchangeDuty = () => {
             Authorization: `Bearer ${token}`
           }
         });
+
         setAssignments(response.data);
         setLoading(false);
       } catch (err) {
@@ -37,7 +37,7 @@ const ExchangeDuty = () => {
         setLoading(false);
       }
     };
-   
+
     const fetchAssignedFaculty = async () => {
       try {
         const response = await axios.get('http://localhost:3106/assignedFaculty', {
@@ -47,7 +47,6 @@ const ExchangeDuty = () => {
         });
 
         setAssignedFaculty(response.data);
-        
       } catch (err) {
         console.error('Failed to fetch assigned faculty', err);
       }
@@ -57,8 +56,6 @@ const ExchangeDuty = () => {
     fetchAssignedFaculty();
   }, []);
 
-  const [facultyId, setFacultyId] = useState(null);
-  console.log(facultyId)
   const handleExchangeRequest = (assignmentId) => {
     setSelectedAssignmentId(assignmentId);
     const selectedAssignment = assignments.find(assignment => assignment._id === assignmentId);
@@ -84,7 +81,7 @@ const ExchangeDuty = () => {
 
     const sessionsForFaculty = assignedFaculty
       .filter(faculty => faculty.facultyId._id === selectedFacultyId && faculty.examDateId._id === exchangeDateId 
-        && faculty.facultyId._id !== selectedAssignmentId
+        // && faculty.facultyId._id !== selectedAssignmentId
       )
       .map(faculty => faculty.examDateId.session);
 
@@ -132,12 +129,6 @@ const ExchangeDuty = () => {
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
-
-  // Extract unique dates from assignedFaculty
-  const uniqueDates = Array.from(new Set(assignedFaculty
-    .filter(faculty => faculty.examDateId.examDate !== selectedAssignmentDate)
-    .map(faculty => JSON.stringify({ id: faculty.examDateId._id, date: faculty.examDateId.examDate }))
-  )).map(dateString => JSON.parse(dateString));
 
   return (
     <div className="container mx-auto px-4">
@@ -210,9 +201,9 @@ const ExchangeDuty = () => {
                 required
               >
                 <option value="">Select Date</option>
-                {uniqueDates.map(({ id, date }) => (
-                  <option key={id} value={id}>
-                    {date}
+                {assignedFaculty.filter(faculty => faculty.examDateId.examDate !== selectedAssignmentDate).map(faculty => (
+                  <option key={faculty.examDateId._id} value={faculty.examDateId._id}>
+                    {faculty.examDateId.examDate}
                   </option>
                 ))}
               </select>
@@ -253,17 +244,17 @@ const ExchangeDuty = () => {
                 ))}
               </select>
             </div>
-            <div className="flex justify-end">
+            <div className="mt-4 flex justify-end space-x-2">
               <button
                 type="button"
-                className="bg-gray-500 text-white px-4 py-2 rounded-md mr-2 hover:bg-gray-600 focus:outline-none focus:ring focus:ring-gray-300"
+                className="bg-gray-500 text-white px-3 py-1 rounded-md hover:bg-gray-600 focus:outline-none focus:ring focus:ring-gray-300"
                 onClick={handleCancelExchange}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
+                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
               >
                 Submit Exchange
               </button>
