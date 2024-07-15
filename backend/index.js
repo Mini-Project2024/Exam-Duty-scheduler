@@ -107,7 +107,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// API routes
 //generating excel file
 
 // app.get('/generateExcel', async (req, res) => {
@@ -344,8 +343,8 @@ app.get("/generateExcel", async (req, res) => {
 
         if (!acc[facultyId]) {
           acc[facultyId] = {
-            facultyName: assignment.facultyName,
-            dept: assignment.facultyId.dept,
+            facultyName: assignment.facultyId?.name || "Unknown Faculty",
+            dept: assignment.facultyId?.dept || "Unknown Dept",
             subjectNames: [],
             subjectCodes: [],
             examDates: [],
@@ -354,11 +353,12 @@ app.get("/generateExcel", async (req, res) => {
             count: 0,
           };
         }
-        acc[facultyId].subjectNames.push(assignment.subject);
-        acc[facultyId].subjectCodes.push(assignment.examDateId.subjectcode);
-        acc[facultyId].examDates.push(assignment.examDateId.examDate);
-        acc[facultyId].sessions.push(assignment.examDateId.session);
-        acc[facultyId].semesters.push(assignment.semester);
+
+        acc[facultyId].subjectNames.push(assignment.subject || "Unknown Subject");
+        acc[facultyId].subjectCodes.push(assignment.examDateId.subjectcode || "Unknown Code");
+        acc[facultyId].examDates.push(assignment.examDateId.examDate || "Unknown Date");
+        acc[facultyId].sessions.push(assignment.examDateId.session || "Unknown Session");
+        acc[facultyId].semesters.push(assignment.semester || "Unknown Semester");
         acc[facultyId].count += 1;
         return acc;
       },
@@ -455,6 +455,8 @@ app.get("/generateExcel", async (req, res) => {
       .json({ success: false, message: "Failed to generate Excel" });
   }
 });
+
+
 
 app.post("/addFaculty", async (req, res) => {
   try {
