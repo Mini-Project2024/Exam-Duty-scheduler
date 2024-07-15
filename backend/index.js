@@ -92,7 +92,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// API routes
 //generating excel file
 
 // app.get('/generateExcel', async (req, res) => {
