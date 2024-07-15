@@ -371,14 +371,14 @@ app.get("/generateExcel", async (req, res) => {
 
     // Add headers
     worksheet.columns = [
-      { header: "Sl No", key: "slNo", width: 8 },
+      { header: "Sl No", key: "slNo", width: 10 },
       { header: "Faculty Name", key: "facultyName", width: 20 },
-      { header: "Dept", key: "dept", width: 10 },
-      { header: "Subject Name", key: "subjectName", width: 20 },
-      { header: "Subject Codes", key: "subjectCodes", width: 20 },
+      { header: "Department", key: "dept", width: 20 },
+      { header: "Subject Name", key: "subjectName", width: 30 },
+      { header: "Subject Codes", key: "subjectCodes", width: 30 },
       { header: "Exam Date", key: "examDate", width: 20 },
-      { header: "Session", key: "session", width: 12 },
-      { header: "Semester", key: "semester", width: 10 },
+      { header: "Session", key: "session", width: 15 },
+      { header: "Semester", key: "semester", width: 15 },
       {
         header: "No. of Duties Completed",
         key: "numberOfDuties",
@@ -760,46 +760,17 @@ app.get(
           select: ["_id", "name"],
         });
 
-    res.status(200).json(assignments);
-  } catch (error) {
-    console.error("Error fetching assigned duty data:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching assigned duty data",
-      error: error.message,
-    });
-  }
-});
-// individual faculty data
-app.get("/assignedFaculty/:facultyName", async (req, res) => {
-  const { facultyName } = req.params;
-
-  try {
-    const assignments = await AssignmentModel.find()
-      .populate({
-        path: "examDateId",
-        select: ["_id", "examDate", "subjectcode", "examName", "semester", "session"],
-      })
-      .populate({
-        path: "facultyId",
-        select: ["_id", "name"],
+      res.status(200).json(assignments);
+    } catch (error) {
+      console.error("Error fetching assigned duty data:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching assigned duty data",
+        error: error.message,
       });
-
-    // Filter assignments by faculty name
-    const filteredAssignments = assignments.filter(
-      assignment => assignment.facultyId.name === facultyName
-    );
-
-    res.status(200).json(filteredAssignments);
-  } catch (error) {
-    console.error("Error fetching assigned duty data:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching assigned duty data",
-      error: error.message,
-    });
+    }
   }
-});
+);
 
 // ------------------------------------------- demo work ---------------------------------------------
 
