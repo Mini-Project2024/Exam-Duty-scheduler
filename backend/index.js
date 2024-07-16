@@ -14,21 +14,25 @@ const ExcelJS = require("exceljs");
 // const fs = require("fs");
 // const { isValidNumber } = require("face-api.js");
 require("dotenv").config();
+
 const app = express();
 app.use(cors());
 app.use(express.json());
+
 // Use admin routes
 // app.use('/admin', adminRoutes);
 // app.use((err, req, res, next) => {
 //   console.error(err.stack);
 //   res.status(500).send('Something broke!');
 // });
+
 mongoose.connect(process.env.MONGODB_URL);
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
 db.once("open", () => {
   console.log("Connected to MongoDB");
 });
+
 var secret_key = "fd85b494-aaaa";
 var secret_iv = "smslt";
 var encryptionMethod = "AES-256-CBC";
@@ -40,12 +44,14 @@ var iv = Crypto.createHash("sha512")
   .update(secret_iv, "utf-8")
   .digest("hex")
   .substr(0, 16);
+
 function encrypt(plain_text, encryptionMethod, secret, iv) {
   var encryptor = Crypto.createCipheriv(encryptionMethod, secret, iv);
   var aes_encrypted = encryptor.update(plain_text, "utf-8", "base64");
   aes_encrypted += encryptor.final("base64");
   return aes_encrypted;
 }
+
 function decrypt(encryptedMessage, encryptionMethod, secret, iv) {
   try {
     let decryptor = Crypto.createDecipheriv(encryptionMethod, secret, iv);
@@ -57,35 +63,44 @@ function decrypt(encryptedMessage, encryptionMethod, secret, iv) {
     return null; // Return null or handle the error appropriately
   }
 }
+
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
+
   try {
     // Find user by username
     const user = await UserModel.findOne({ name: username });
+
     // Check if user exists
     if (!user) {
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
     }
+
     // Compare passwords
     const isMatch =
       password === decrypt(user.password, encryptionMethod, key, iv);
+
     if (!isMatch) {
       return res
         .status(401)
         .json({ success: false, message: "Invalid credentials" });
     }
+
     // User authenticated successfully, generate JWT
     const payload = { id: user._id };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
+
     // Store the token in the user's document
     user.token = token;
     await user.save();
+
     // Respond with success message and token
     res.status(200).json({ success: true, message: "Login successful", token,username });
+
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -98,6 +113,7 @@ app.post("/login", async (req, res) => {
 //   // Extract date range from query parameters
 //   const from = req.query.from; // Example: '2024-06-01'
 //   const to = req.query.to;     // Example: '2024-06-30'
+
 //   // Example data (you can replace this with actual data retrieval based on the date range)
 //   const exampleData = [
 //     {
@@ -117,11 +133,14 @@ app.post("/login", async (req, res) => {
 //       signature: ''
 //     }
 //   ];
+
 //   // Create a new workbook and add a worksheet
 //   const workbook = new ExcelJS.Workbook();
 //   const worksheet = workbook.addWorksheet('Exam Duties');
+
 //   // Add "Exam Details" in the first row
-//   worksheet.addRow({ ExamDetails: `From ${from} to ${to}` });
+//   worksheet.addRow({ ExamDetails: From ${from} to ${to} });
+
 //   // Add column headers
 //   worksheet.columns = [
 //     { header: 'Sl No', key: 'slNo', width: 10 },
@@ -132,6 +151,7 @@ app.post("/login", async (req, res) => {
 //     { header: 'No of Duties Completed', key: 'noOfDutiesCompleted', width: 20 },
 //     { header: 'Signature', key: 'signature', width: 50 }
 //   ];
+
 //   // Add rows with the example data
 //   exampleData.forEach((data, index) => {
 //     worksheet.addRow({
@@ -144,23 +164,29 @@ app.post("/login", async (req, res) => {
 //       signature: data.signature
 //     });
 //   });
+
 //   // Set headers for the response
 //   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 //   res.setHeader('Content-Disposition', 'attachment; filename=exam_duties.xlsx');
+
 //   // Write the workbook to the response
 //   await workbook.xlsx.write(res);
 //   res.end();
 // });
+
 // app.get('/generateExcel', async (req, res) => {
 //   try {
 //     const { from, to } = req.query;
+
 //     // Validate if from and to dates are provided
 //     if (!from || !to) {
 //       return res.status(400).json({ success: false, message: 'From and To dates are required' });
 //     }
+
 //     // Convert from and to dates to JavaScript Date objects
 //     const fromDate = new Date(from);
 //     const toDate = new Date(to);
+
 //     // Fetch assignments within the date range with examDate details
 //     const assignments = await AssignmentModel.find().populate({
 //       path: 'examDateId',
@@ -171,12 +197,15 @@ app.post("/login", async (req, res) => {
 //         }
 //       }
 //     }).populate('facultyId');
+
 //     // Filter out assignments where examDateId is null (i.e., no matching examDate)
 //     const filteredAssignments = assignments.filter(assignment => assignment.examDateId);
+
 //     // Group assignments by facultyId and consolidate work details
 //     const assignmentCountByFaculty = filteredAssignments.reduce((acc, assignment) => {
 //       const facultyId = assignment.facultyId?._id?.toString();
 //       if (!facultyId) return acc;
+
 //       if (!acc[facultyId]) {
 //         acc[facultyId] = {
 //           facultyName: assignment.facultyName,
@@ -197,9 +226,11 @@ app.post("/login", async (req, res) => {
 //       acc[facultyId].count += 1;
 //       return acc;
 //     }, {});
+
 //     // Create Excel workbook
 //     const workbook = new ExcelJS.Workbook();
 //     const worksheet = workbook.addWorksheet('Exam Duties');
+
 //     // Add headers
 //     worksheet.columns = [
 //       { header: 'Sl No', key: 'slNo', width: 10 },
@@ -213,6 +244,7 @@ app.post("/login", async (req, res) => {
 //       { header: 'Number of Duties Completed', key: 'numberOfDuties', width: 30 },
 //       { header: 'Signature', key: 'signature', width: 30 }
 //     ];
+
 //     // Make the first row bold and slightly larger
 //     const headerRow = worksheet.getRow(1);
 //     headerRow.height = 20; // Set header row height
@@ -226,6 +258,7 @@ app.post("/login", async (req, res) => {
 //         right: { style: 'thin' }
 //       };
 //     });
+
 //     // Add rows with assignment data
 //     let index = 1;
 //     Object.values(assignmentCountByFaculty).forEach((assignment) => {
@@ -240,7 +273,9 @@ app.post("/login", async (req, res) => {
 //         numberOfDuties: assignment.count,
 //         signature: ''
 //       });
+
 //       row.height = 40; // Set the same height for all data rows
+
 //       // Set the alignment to wrap text and center-align, and add borders
 //       row.eachCell({ includeEmpty: true }, (cell) => {
 //         cell.alignment = { wrapText: true, vertical: 'top', horizontal: 'center' };
@@ -252,29 +287,36 @@ app.post("/login", async (req, res) => {
 //         };
 //       });
 //     });
+
 //     // Set headers for the response
 //     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 //     res.setHeader('Content-Disposition', 'attachment; filename=exam_duties.xlsx');
+
 //     // Write workbook to response
 //     await workbook.xlsx.write(res);
 //     res.end();
+
 //   } catch (error) {
 //     console.error('Error generating Excel:', error);
 //     res.status(500).json({ success: false, message: 'Failed to generate Excel' });
 //   }
 // });
+
 app.get("/generateExcel", async (req, res) => {
   try {
     const { from, to } = req.query;
+
     // Validate if from and to dates are provided
     if (!from || !to) {
       return res
         .status(400)
         .json({ success: false, message: "From and To dates are required" });
     }
+
     // Convert from and to dates to JavaScript Date objects
     const fromDate = new Date(from);
     const toDate = new Date(to);
+
     // Fetch assignments within the date range with examDate details
     const assignments = await AssignmentModel.find()
       .populate({
@@ -287,10 +329,12 @@ app.get("/generateExcel", async (req, res) => {
         },
       })
       .populate("facultyId");
+
     // Filter out assignments where examDateId is null (i.e., no matching examDate)
     const filteredAssignments = assignments.filter(
       (assignment) => assignment.examDateId
     );
+
     // Group assignments by facultyId and consolidate work details
     const assignmentCountByFaculty = filteredAssignments.reduce(
       (acc, assignment) => {
@@ -320,9 +364,11 @@ app.get("/generateExcel", async (req, res) => {
       },
       {}
     );
+
     // Create Excel workbook
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Exam Duties");
+
     // Add headers
     worksheet.columns = [
       { header: "Sl No", key: "slNo", width: 8 },
@@ -340,6 +386,7 @@ app.get("/generateExcel", async (req, res) => {
       },
       { header: "Signature", key: "signature", width: 30 },
     ];
+
     // Make the first row bold and slightly larger
     const headerRow = worksheet.getRow(1);
     headerRow.height = 20; // Set header row height
@@ -353,6 +400,7 @@ app.get("/generateExcel", async (req, res) => {
         right: { style: "thin" },
       };
     });
+
     // Add rows with assignment data
     let index = 1;
     Object.values(assignmentCountByFaculty).forEach((assignment) => {
@@ -368,7 +416,9 @@ app.get("/generateExcel", async (req, res) => {
         numberOfDuties: assignment.count,
         signature: "",
       });
+
       row.height = 40; // Set the same height for all data rows
+
       // Set the alignment to wrap text and center-align, and add borders
       row.eachCell({ includeEmpty: true }, (cell) => {
         cell.alignment = {
@@ -384,6 +434,7 @@ app.get("/generateExcel", async (req, res) => {
         };
       });
     });
+
     // Set headers for the response
     res.setHeader(
       "Content-Type",
@@ -393,6 +444,7 @@ app.get("/generateExcel", async (req, res) => {
       "Content-Disposition",
       "attachment; filename=exam_duties.xlsx"
     );
+
     // Write workbook to response
     await workbook.xlsx.write(res);
     res.end();
@@ -409,14 +461,17 @@ app.get("/generateExcel", async (req, res) => {
 app.post("/addFaculty", async (req, res) => {
   try {
     const { name, designation, password, dept } = req.body;
+
     // Encrypt the password
     const encryptedPassword = encrypt(password, encryptionMethod, key, iv);
+
     const newFaculty = new UserModel({
       name,
       designation,
       password: encryptedPassword,
       dept,
     });
+
     await newFaculty.save();
     res.json(newFaculty);
   } catch (error) {
@@ -424,12 +479,15 @@ app.post("/addFaculty", async (req, res) => {
     res.status(400).json({ message: "Error adding faculty member." });
   }
 });
+
 // Fetch faculty with decryption
 app.get("/faculty", async (req, res) => {
   try {
     const facultyData = await UserModel.find();
+
     const decryptedFacultyData = facultyData.map((faculty) => {
       const encryptedPassword = faculty.password;
+
       // Decrypt the password
       const decryptedPassword = decrypt(
         encryptedPassword,
@@ -437,25 +495,30 @@ app.get("/faculty", async (req, res) => {
         key,
         iv
       );
+
       return {
         ...faculty.toObject(),
         password: decryptedPassword,
       };
     });
+
     res.json(decryptedFacultyData);
   } catch (error) {
     console.error("Error fetching faculty data:", error);
     res.status(500).json({ message: "Error fetching faculty data." });
   }
 });
+
 // Delete faculty member
 app.delete("/deleteFaculty/:id", async (req, res) => {
   try {
     const { id } = req.params;
     // Delete the faculty member
     await UserModel.findByIdAndDelete(id);
+
     // Delete assignments associated with this faculty
     await AssignmentModel.deleteMany({ facultyId: id });
+
     res.status(200).json({
       success: true,
       message:
@@ -469,26 +532,32 @@ app.delete("/deleteFaculty/:id", async (req, res) => {
     });
   }
 });
+
 // Update faculty member
 app.put("/updateFaculty/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { name, designation, password, dept } = req.body;
+
     let updatedData = { name, designation, dept };
+
     if (password) {
       const encryptedPassword = encrypt(password);
       updatedData.password = encryptedPassword;
     }
+
     const updatedFaculty = await UserModel.findByIdAndUpdate(id, updatedData, {
       new: true,
     });
     console.log("Updated faculty:", updatedFaculty);
+
     if (!updatedFaculty) {
       console.error("Faculty not found.");
       return res
         .status(404)
         .json({ success: false, message: "Faculty not found." });
     }
+
     res.status(200).json({
       success: true,
       message: "Faculty details updated successfully.",
@@ -501,6 +570,7 @@ app.put("/updateFaculty/:id", async (req, res) => {
       .json({ success: false, message: "Error updating faculty details." });
   }
 });
+
 // Add exam date
 app.post("/addExamdate", async (req, res) => {
   try {
@@ -512,6 +582,7 @@ app.post("/addExamdate", async (req, res) => {
     res.status(400).json({ message: "Error adding exam date." });
   }
 });
+
 // Checking for existing exam
 app.get("/checkExamDate", async (req, res) => {
   try {
@@ -522,6 +593,7 @@ app.get("/checkExamDate", async (req, res) => {
       semester,
       session,
     });
+
     if (existingExam) {
       res.json(existingExam);
     } else {
@@ -532,6 +604,7 @@ app.get("/checkExamDate", async (req, res) => {
     res.status(400).json({ message: "Error checking exam date." });
   }
 });
+
 // Get exam details
 app.get("/getExamDetails", async (req, res) => {
   try {
@@ -542,11 +615,13 @@ app.get("/getExamDetails", async (req, res) => {
     res.status(500).json({ message: "Error fetching exam dates" });
   }
 });
+
 // Delete exam date
 app.delete("/deleteExamDate/:id", async (req, res) => {
   try {
     const { id } = req.params;
     await examDateModel.findByIdAndDelete(id);
+
     // Delete assignments associated with this exam date
     await AssignmentModel.deleteMany({ examDateId: id });
     res
@@ -559,6 +634,7 @@ app.delete("/deleteExamDate/:id", async (req, res) => {
       .json({ success: false, message: "Error deleting exam details." });
   }
 });
+
 // Update exam date
 app.put("/updateExamDate/:id", async (req, res) => {
   try {
@@ -571,6 +647,7 @@ app.put("/updateExamDate/:id", async (req, res) => {
       examDate,
       session,
     });
+
     const updatedExam = await examDateModel.findByIdAndUpdate(
       id,
       { examName, subjectcode, examDate, session },
@@ -581,12 +658,14 @@ app.put("/updateExamDate/:id", async (req, res) => {
       { $set: { date: examDate } }
     ).exec();
     console.log("Updated exam:", updatedExam);
+
     if (!updatedExam) {
       console.error("Exam not found.");
       return res
         .status(404)
         .json({ success: false, message: "Exam not found." });
     }
+
     res.status(200).json({
       success: true,
       message: "Exam details updated successfully.",
@@ -599,11 +678,13 @@ app.put("/updateExamDate/:id", async (req, res) => {
       .json({ success: false, message: "Error updating exam details." });
   }
 });
+
 // Assign duty
 app.post("/assignDuty", async (req, res) => {
   try {
     const { examDateId, facultyId, facultyName, session, semester, subject } =
       req.body;
+
     const newAssignment = new AssignmentModel({
       examDateId,
       facultyId,
@@ -612,12 +693,15 @@ app.post("/assignDuty", async (req, res) => {
       semester,
       subject,
     });
+
     await newAssignment.save();
+
     res.status(201).json(newAssignment);
   } catch (error) {
     res.status(500).json({ message: "Failed to assign duty", error });
   }
 });
+
 // Fetch assigned data
 app.get("/assignedFaculty", async (req, res) => {
   try {
@@ -637,6 +721,7 @@ app.get("/assignedFaculty", async (req, res) => {
         path: "facultyId",
         select: ["_id", "name"],
       });
+
     res.status(200).json(assignments);
   } catch (error) {
     console.error("Error fetching assigned duty data:", error);
@@ -647,7 +732,7 @@ app.get("/assignedFaculty", async (req, res) => {
     });
   }
 });
-//fetch faculty details
+//fetch each faculty details
 app.get(
   "/assignedFaculty/me",
   passport.authenticate("jwt", { session: false }),
@@ -656,10 +741,19 @@ app.get(
       if (!req.user) {
         throw new Error("User not authenticated");
       }
+
       const facultyName = req.user.name; // Get the username from the authenticated user
-      // console.log("Authenticated user:", req.user); // Add this line for debugging
+
+      // Find the faculty ID for the authenticated user
+      const faculty = await UserModel.findOne({ name: facultyName });
+
+      if (!faculty) {
+        return res.status(404).json({ message: "Faculty not found" });
+      }
+
+      // Find assignments based on the faculty ID
       const assignments = await AssignmentModel.find({
-        facultyName: facultyName,
+        facultyId: faculty._id,
       })
         .populate({
           path: "examDateId",
@@ -676,44 +770,21 @@ app.get(
           path: "facultyId",
           select: ["_id", "name"],
         });
-    res.status(200).json(assignments);
-  } catch (error) {
-    console.error("Error fetching assigned duty data:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching assigned duty data",
-      error: error.message,
-    });
-  }
-});
-// individual faculty data
-app.get("/assignedFaculty/:facultyName", async (req, res) => {
-  const { facultyName } = req.params;
-  try {
-    const assignments = await AssignmentModel.find()
-      .populate({
-        path: "examDateId",
-        select: ["_id", "examDate", "subjectcode", "examName", "semester", "session"],
-      })
-      .populate({
-        path: "facultyId",
-        select: ["_id", "name"],
+
+      res.status(200).json(assignments);
+    } catch (error) {
+      console.error("Error fetching assigned duty data:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error fetching assigned duty data",
+        error: error.message,
       });
-    // Filter assignments by faculty name
-    const filteredAssignments = assignments.filter(
-      assignment => assignment.facultyId.name === facultyName
-    );
-    res.status(200).json(filteredAssignments);
-  } catch (error) {
-    console.error("Error fetching assigned duty data:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching assigned duty data",
-      error: error.message,
-    });
+    }
   }
-});
+);
+
 // ------------------------------------------- demo work ---------------------------------------------
+
 // New route to get distinct exam dates with faculties
 app.get(
   "/distinctExamDates",
@@ -729,6 +800,7 @@ app.get(
           path: "facultyId",
           select: ["_id", "name"],
         });
+
       // Group by examDateId and gather faculty names
       const groupedByDate = assignments.reduce((acc, assignment) => {
         const { examDateId, facultyId } = assignment;
@@ -743,12 +815,14 @@ app.get(
         acc[dateKey].faculties.add(facultyId.name);
         return acc;
       }, {});
+
       // Convert sets to arrays and remove duplicate dates
       const distinctDates = Object.values(groupedByDate).map((item) => ({
         examDate: item.examDate,
         examName: item.examName,
         faculties: Array.from(item.faculties),
       }));
+
       res.json(distinctDates);
     } catch (error) {
       console.error("Error fetching distinct exam dates:", error);
@@ -761,7 +835,9 @@ app.get(
     }
   }
 );
+
 // ------------------------------------------------------------------------------------------------------
+
 // Exchange duty route
 app.get(
   "/exchangeDuty",
@@ -771,10 +847,19 @@ app.get(
       if (!req.user) {
         throw new Error("User not authenticated");
       }
+
       const facultyName = req.user.name; // Get the username from the authenticated user
-      // console.log("Authenticated user:", req.user); // Add this line for debugging
+
+      // Find the faculty ID for the authenticated user
+      const faculty = await UserModel.findOne({ name: facultyName });
+
+      if (!faculty) {
+        return res.status(404).json({ message: "Faculty not found" });
+      }
+
+      // Find assignments based on the faculty ID
       const assignments = await AssignmentModel.find({
-        facultyName: facultyName,
+        facultyId: faculty._id,
       })
         .populate({
           path: "examDateId",
@@ -784,6 +869,7 @@ app.get(
           path: "facultyId",
           select: ["_id", "name"],
         });
+
       res.status(200).json(assignments);
     } catch (error) {
       console.error("Error fetching assigned duty data:", error);
@@ -795,39 +881,48 @@ app.get(
     }
   }
 );
+
 // Route to handle duty exchange request
 // app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { session: false }), async (req, res) => {
 //   try {
 //     const { assignmentId } = req.params;
 //     const { exchangeDateId, exchangeFacultyId, exchangeSession } = req.body;
 //     const userId = req.user.id;
+
 //     const userAssignment = await AssignmentModel.findById(assignmentId);
 //     const exchangeAssignment = await AssignmentModel.findOne({
 //       facultyId: exchangeFacultyId,
 //       examDateId: exchangeDateId,
 //       session: exchangeSession,
 //     });
+
 //     if (!userAssignment || !exchangeAssignment) {
 //       return res.status(404).json({ message: 'Assignment not found' });
 //     }
+
 //     // Swap the assignments
 //     const tempDateId = userAssignment.examDateId;
 //     const tempFacultyId = userAssignment.facultyId;
 //     const tempSession = userAssignment.examDateId.session;
+
 //     userAssignment.examDateId = exchangeAssignment.examDateId;
 //     userAssignment.facultyId = exchangeAssignment.facultyId;
 //     userAssignment.examDateId.session = exchangeAssignment.session;
+
 //     exchangeAssignment.examDateId = tempDateId;
 //     exchangeAssignment.facultyId = tempFacultyId;
 //     exchangeAssignment.session = tempSession;
+
 //     await userAssignment.save();
 //     await exchangeAssignment.save();
+
 //     res.json({ message: 'Exchange successful' });
 //   } catch (err) {
 //     console.error('Failed to request exchange:', err);
 //     res.status(500).json({ message: 'Failed to request exchange', error: err.message });
 //   }
 // });
+
 app.post(
   "/requestExchange/:assignmentId",
   passport.authenticate("jwt", { session: false }),
@@ -836,6 +931,7 @@ app.post(
       const { assignmentId } = req.params;
       const { exchangeDateId, exchangeFacultyId, exchangeSession } = req.body;
       const userId = req.user.id;
+
       // Ensure the IDs are valid ObjectId types
       if (
         !mongoose.Types.ObjectId.isValid(assignmentId) ||
@@ -844,15 +940,18 @@ app.post(
       ) {
         return res.status(400).json({ message: "Invalid ID format" });
       }
+
       const userAssignment = await AssignmentModel.findById(assignmentId);
       const exchangeAssignment = await AssignmentModel.findOne({
         facultyId: exchangeFacultyId,
         examDateId: exchangeDateId,
         session: exchangeSession,
       });
+
       if (!userAssignment || !exchangeAssignment) {
         return res.status(404).json({ message: "Assignment not found" });
       }
+
       // Create exchange request
       const exchangeRequest = new ExchangeRequest({
         originalAssignment: userAssignment._id,
@@ -861,7 +960,9 @@ app.post(
         exchangeSession,
         status: "Pending", // Initial status is pending
       });
+
       await exchangeRequest.save();
+
       res.json({ message: "Exchange request submitted successfully" });
     } catch (err) {
       console.error("Failed to request exchange:", err);
@@ -871,16 +972,24 @@ app.post(
     }
   }
 );
+
 // Get all exchange requests (for admin)
+
 app.get("/admin/exchangeRequestslist", async (req, res) => {
   try {
     const exchangeRequests = await ExchangeRequest.find()
       .populate({
         path: "originalAssignment",
-        populate: {
-          path: "examDateId",
-          select: ["_id", "examDate", "examName", "session"],
-        },
+        populate: [
+          {
+            path: "examDateId",
+            select: ["_id", "examDate", "examName", "session"],
+          },
+          {
+            path: "facultyId",
+            select: ["_id", "name"],
+          },
+        ],
       })
       .populate({
         path: "exchangeFacultyId",
@@ -890,11 +999,13 @@ app.get("/admin/exchangeRequestslist", async (req, res) => {
         path: "exchangeDateId",
       })
       .exec();
+
     // Filter out any requests with missing originalAssignment or examDateId
     const filteredRequests = exchangeRequests.filter(
       (request) =>
         request.originalAssignment && request.originalAssignment.examDateId
     );
+
     res.json(filteredRequests);
   } catch (error) {
     console.error("Error fetching exchange requests:", error);
@@ -906,17 +1017,22 @@ app.get("/admin/exchangeRequestslist", async (req, res) => {
       });
   }
 });
+
+
 const updateAssignmentFaculty = async (assignmentId, newFacultyId) => {
   const updatedAssignment = await AssignmentModel.findByIdAndUpdate(
     assignmentId,
     { facultyId: newFacultyId },
     { new: true }
   );
+
   return updatedAssignment;
 };
+
 app.put("/admin/approveExchangeRequest/:requestId", async (req, res) => {
   try {
     const { requestId } = req.params;
+
     // Find the exchange request and populate the required fields
     const exchangeRequest = await ExchangeRequest.findById(requestId)
       .populate({
@@ -934,51 +1050,63 @@ app.put("/admin/approveExchangeRequest/:requestId", async (req, res) => {
         path: "exchangeDateId",
         model: "ExamDate",
       });
+
     if (!exchangeRequest) {
       return res.status(404).json({ message: "Exchange request not found" });
     }
+
     // Extract the details from the exchange request
     const originalAssignment = exchangeRequest.originalAssignment;
     const exchangeFaculty = exchangeRequest.exchangeFacultyId;
     const exchangeDate = exchangeRequest.exchangeDateId;
     const exchangeSession = exchangeRequest.exchangeSession;
+
     // Find the assignment for the exchange faculty on the specified date and session
     const exchangeAssignment = await AssignmentModel.findOne({
       examDateId: exchangeDate._id,
       session: exchangeSession,
       facultyId: exchangeFaculty._id,
     });
+
     if (!exchangeAssignment) {
       return res.status(404).json({ message: "Exchange assignment not found" });
     }
+
     // Temporary variables to store the faculty details
     const originalFacultyId = originalAssignment.facultyId;
     const originalFacultyName = originalAssignment.facultyName;
     const exchangeFacultyId = exchangeFaculty._id;
     const exchangeFacultyName = exchangeFaculty.name;
+
     // Swap the faculty IDs and names
     originalAssignment.facultyId = exchangeFacultyId;
     originalAssignment.facultyName = exchangeFacultyName;
     exchangeAssignment.facultyId = originalFacultyId;
     exchangeAssignment.facultyName = originalFacultyName;
+
     // Save the changes
     await originalAssignment.save();
     await exchangeAssignment.save();
+
     // Update the exchange request status to 'Approved'
     exchangeRequest.status = "Approved";
     await exchangeRequest.save();
+
     res.json({
       message: "Exchange request approved successfully",
       data: exchangeRequest,
     });
   } catch (error) {
     console.error("Error approving exchange request:", error);
+
     const { requestId } = req.params;
     const exchangeRequest = await ExchangeRequest.findById(requestId);
+
     if (exchangeRequest && exchangeRequest.status === "Pending") {
       exchangeRequest.status = "Rejected";
       await exchangeRequest.save();
     }
+
     res
       .status(500)
       .json({
@@ -987,33 +1115,42 @@ app.put("/admin/approveExchangeRequest/:requestId", async (req, res) => {
       });
   }
 });
+
 // Approve exchange request
 // app.put('/approveExchangeRequest/:requestId', async (req, res) => {
 //   try {
 //     const { requestId } = req.params;
+
 //     const exchangeRequest = await ExchangeRequest.findByIdAndUpdate(requestId, { status: 'Approved' }, { new: true });
+
 //     if (!exchangeRequest) {
 //       return res.status(404).json({ message: 'Exchange request not found' });
 //     }
+
 //     // Perform additional actions if needed (e.g., update assignments)
+
 //     res.json({ message: 'Exchange request approved successfully', data: exchangeRequest });
 //   } catch (error) {
 //     console.error('Error approving exchange request:', error);
 //     res.status(500).json({ message: 'Error approving exchange request', error: error.message });
 //   }
 // });
+
 // // Reject exchange request
 app.put("/admin/rejectExchangeRequest/:requestId", async (req, res) => {
   try {
     const { requestId } = req.params;
+
     const exchangeRequest = await ExchangeRequest.findByIdAndUpdate(
       requestId,
       { status: "Rejected" },
       { new: true }
     );
+
     if (!exchangeRequest) {
       return res.status(404).json({ message: "Exchange request not found" });
     }
+
     res.json({
       message: "Exchange request rejected successfully",
       data: exchangeRequest,
@@ -1028,6 +1165,7 @@ app.put("/admin/rejectExchangeRequest/:requestId", async (req, res) => {
       });
   }
 });
+
 // Logout feature
 app.post("/logout", (req, res) => {
   res.status(200).json({ success: true, message: "Logout successful" });

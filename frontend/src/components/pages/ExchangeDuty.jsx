@@ -81,7 +81,7 @@ const ExchangeDuty = () => {
 
     const sessionsForFaculty = assignedFaculty
       .filter(faculty => faculty.facultyId._id === selectedFacultyId && faculty.examDateId._id === exchangeDateId 
-        // && faculty.facultyId._id !== selectedAssignmentId
+        && faculty.facultyId._id !== selectedAssignmentId
       )
       .map(faculty => faculty.examDateId.session);
 

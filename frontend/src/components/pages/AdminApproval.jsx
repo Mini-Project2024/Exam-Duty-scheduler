@@ -120,7 +120,7 @@ const AdminExchangeRequests = () => {
                   {request.originalAssignment.examDateId.examDate}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.originalAssignment.facultyName}
+                  {request.originalAssignment.facultyId.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                   {request.originalAssignment.session}
