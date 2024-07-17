@@ -417,7 +417,7 @@ app.get("/generateExcel", async (req, res) => {
         signature: "",
       });
 
-      row.height = 40; // Set the same height for all data rows
+      row.height = assignment.subjectNames.length * 20; // Dynamically set the height based on the number of subjects
 
       // Set the alignment to wrap text and center-align, and add borders
       row.eachCell({ includeEmpty: true }, (cell) => {
@@ -455,6 +455,7 @@ app.get("/generateExcel", async (req, res) => {
       .json({ success: false, message: "Failed to generate Excel" });
   }
 });
+
 
 
 
