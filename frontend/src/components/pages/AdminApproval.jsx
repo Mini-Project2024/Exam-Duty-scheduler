@@ -29,7 +29,7 @@ const AdminExchangeRequests = () => {
 
   const handleApproveRequest = async (requestId) => {
     try {
-      const response = await axios.put(`http://localhost:3106/admin/approveExchangeRequest/${requestId}`, {}, {
+      await axios.put(`http://localhost:3106/admin/approveExchangeRequest/${requestId}`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
         },
@@ -43,11 +43,6 @@ const AdminExchangeRequests = () => {
     } catch (error) {
       console.error('Error approving exchange request:', error);
       toast.error('Failed to approve exchange request');
-      setExchangeRequests((prevRequests) =>
-        prevRequests.map((request) =>
-          request._id === requestId ? { ...request, status: 'Denied' } : request
-        )
-      );
     }
   };
 
@@ -102,12 +97,15 @@ const AdminExchangeRequests = () => {
               <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Exchange Session
               </th>
-              <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {/* <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
-              </th>
+              </th> */}
               <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
+              {/* <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Created At
+              </th> */}
             </tr>
           </thead>
           <tbody>
@@ -134,11 +132,11 @@ const AdminExchangeRequests = () => {
                 <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                   {request.exchangeSession}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                {/* <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                   {request.status}
-                </td>
+                </td> */}
                 <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.status === 'Pending' && (
+                  {request.status === 'Pending' ? (
                     <div>
                       <button
                         className="bg-green-500 text-white px-2 py-1 rounded-md hover:bg-green-600 focus:outline-none focus:ring focus:ring-green-300 mr-2"
@@ -153,8 +151,19 @@ const AdminExchangeRequests = () => {
                         Reject
                       </button>
                     </div>
+                  ) : (
+                    <span
+                      className={`px-2 py-1 rounded-md text-white ${
+                        request.status === 'Approved' ? 'bg-green-500' : 'bg-red-500'
+                      }`}
+                    >
+                      {request.status}
+                    </span>
                   )}
                 </td>
+                {/* <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                  {new Date(request.createdAt).toLocaleString()}
+                </td> */}
               </tr>
             ))}
           </tbody>

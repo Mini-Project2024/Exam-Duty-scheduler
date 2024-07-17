@@ -15,6 +15,7 @@ const ExchangeDuty = () => {
   const [exchangeSession, setExchangeSession] = useState('');
   const [selectedAssignmentId, setSelectedAssignmentId] = useState('');
   const [selectedAssignmentDate, setSelectedAssignmentDate] = useState('');
+  const [exchangeRequests, setExchangeRequests] = useState({}); // To keep track of exchange requests
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -51,9 +52,28 @@ const ExchangeDuty = () => {
         console.error('Failed to fetch assigned faculty', err);
       }
     };
+    const fetchExchangeRequests = async () => {
+      try {
+        const response = await axios.get('http://localhost:3106/admin/exchangeRequestslist', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        const exchangeRequestsMap = {};
+        response.data.forEach(request => {
+          exchangeRequestsMap[request.originalAssignment._id] = request.status;
+        });
+
+        setExchangeRequests(exchangeRequestsMap);
+      } catch (err) {
+        console.error('Failed to fetch exchange requests', err);
+      }
+    };
 
     fetchUserDetails();
     fetchAssignedFaculty();
+    fetchExchangeRequests();
   }, []);
 
   const handleExchangeRequest = (assignmentId) => {
@@ -88,7 +108,8 @@ const ExchangeDuty = () => {
     setAvailableSessions(sessionsForFaculty);
     setExchangeSession('');
   };
-
+ 
+  
   const handleSubmitExchange = async (event) => {
     event.preventDefault();
     try {
@@ -107,6 +128,12 @@ const ExchangeDuty = () => {
         }
       });
       toast.success(response.data.message);
+
+      // Update the exchangeRequests state to disable the button and show the status
+      setExchangeRequests(prevState => ({
+        ...prevState,
+        [selectedAssignmentId]: 'Requested'
+      }));
 
       // Fetch updated assignments
       const updatedAssignments = await axios.get('http://localhost:3106/exchangeDuty', {
@@ -174,13 +201,14 @@ const ExchangeDuty = () => {
                     {assignment.examDateId.session}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                    <button
-                      className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
-                      onClick={() => handleExchangeRequest(assignment._id)}
-                    >
-                      Request Exchange
-                    </button>
-                  </td>
+                  <button
+ className={`px-2 py-1 rounded-md focus:outline-none focus:ring ${['Pending', 'Approved', 'Rejected'].includes(exchangeRequests[assignment._id]) ? 'bg-gray-500 text-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600 focus:ring-blue-300'}`}
+  onClick={() => handleExchangeRequest(assignment._id)}
+  disabled={['Pending', 'Approved', 'Rejected'].includes(exchangeRequests[assignment._id])}
+>
+  {['Pending', 'Approved', 'Rejected'].includes(exchangeRequests[assignment._id]) ? 'No Exchange' : 'Request Exchange'}
+</button>
+    </td>
                 </tr>
               ))}
             </tbody>

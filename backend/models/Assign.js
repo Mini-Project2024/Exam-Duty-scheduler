@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const assignmentSchema = new mongoose.Schema({
   examDateId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -10,13 +11,14 @@ const assignmentSchema = new mongoose.Schema({
     ref: 'examduty',
     required: true,
   },
-  // facultyName: {
-  //   type: String,
-  //   required: true,
-  // },
   session: String,
   semester: String,
   subject: String,
+  status: {
+    type: String,
+    enum: ['Pending', 'Approved', 'Rejected', 'No Exchange'],
+    
+  },
 });
 
 const AssignmentModel = mongoose.model('Assignment', assignmentSchema);

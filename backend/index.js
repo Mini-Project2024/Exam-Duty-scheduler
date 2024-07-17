@@ -870,6 +870,12 @@ app.get(
           select: ["_id", "name"],
         });
 
+      // Save the facultyName in each assignment
+      // for (const assignment of assignments) {
+      //   assignment.facultyName = facultyName;
+      //   await assignment.save();
+      // }
+
       res.status(200).json(assignments);
     } catch (error) {
       console.error("Error fetching assigned duty data:", error);
@@ -881,6 +887,7 @@ app.get(
     }
   }
 );
+
 
 // Route to handle duty exchange request
 // app.post('/requestExchange/:assignmentId', passport.authenticate('jwt', { session: false }), async (req, res) => {
@@ -998,6 +1005,7 @@ app.get("/admin/exchangeRequestslist", async (req, res) => {
       .populate({
         path: "exchangeDateId",
       })
+      .sort({ createdAt: -1 })
       .exec();
 
     // Filter out any requests with missing originalAssignment or examDateId

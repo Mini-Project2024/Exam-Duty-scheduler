@@ -13,7 +13,7 @@ const exchangeRequestSchema = new mongoose.Schema({
   },
   exchangeFacultyId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:'examduty',
+    ref: 'examduty',
     required: true,
   },
   exchangeSession: {
@@ -25,8 +25,14 @@ const exchangeRequestSchema = new mongoose.Schema({
     enum: ['Pending', 'Approved', 'Rejected'],
     default: 'Pending',
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const ExchangeRequest = mongoose.model('ExchangeRequest', exchangeRequestSchema);
 
 module.exports = ExchangeRequest;
+
+
