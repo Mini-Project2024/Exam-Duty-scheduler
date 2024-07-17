@@ -23,11 +23,13 @@ const FacultyDetails = () => {
 
       facultyData.forEach((faculty) => {
         const { dept, name, schedule } = faculty;
-        deptSet.add(dept);
-        if (!facultyByDept[dept]) {
-          facultyByDept[dept] = {};
+        if (dept !== 'CSE') {  // Exclude CSE department
+          deptSet.add(dept);
+          if (!facultyByDept[dept]) {
+            facultyByDept[dept] = {};
+          }
+          facultyByDept[dept][name] = schedule || [];
         }
-        facultyByDept[dept][name] = schedule || [];
       });
 
       setDepartments(Array.from(deptSet));
@@ -39,7 +41,7 @@ const FacultyDetails = () => {
 
   const fetchAssignedDutyData = async (facultyName) => {
     try {
-      const response = await axios.get(`http://localhost:3106/assignedFaculty/${facultyName}`);
+      const response = await axios.get(`http://localhost:3106/facultyDuty/${facultyName}`);
       const assignedDutyData = response.data;
   
       setAssignedDuty(assignedDutyData);
