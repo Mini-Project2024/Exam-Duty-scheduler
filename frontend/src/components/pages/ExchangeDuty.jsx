@@ -217,12 +217,13 @@ const ExchangeDuty = () => {
                       <span className={`px-2 py-1 rounded-md ${
                         exchangeRequests[assignment._id] === 'Approved' ? 'bg-green-300 text-green-600' :
                         exchangeRequests[assignment._id] === 'Rejected' ? 'bg-red-300 text-red-600' :
+                        exchangeRequests[assignment._id] === 'pending' ? 'bg-red-300 text-orange-600' :
                         'bg-gray-300 text-gray-600'
                       }`}>
                         {exchangeRequests[assignment._id]}
                       </span>
                     ) : (
-                      <span className="bg-gray-300 text-gray-600 px-2 py-1 rounded-md">Pending</span>
+                      <span className="bg-gray-300 text-gray-600 px-2 py-1 rounded-md">No change</span>
                     )}
                   </td>
                 </tr>
