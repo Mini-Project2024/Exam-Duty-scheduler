@@ -183,6 +183,9 @@ const ExchangeDuty = () => {
                 <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Change
                 </th>
+                <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Approval Status
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -209,6 +212,19 @@ const ExchangeDuty = () => {
   {['Pending', 'Approved', 'Rejected'].includes(exchangeRequests[assignment._id]) ? 'No Exchange' : 'Request Exchange'}
 </button>
     </td>
+    <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                    {exchangeRequests[assignment._id] ? (
+                      <span className={`px-2 py-1 rounded-md ${
+                        exchangeRequests[assignment._id] === 'Approved' ? 'bg-green-300 text-green-600' :
+                        exchangeRequests[assignment._id] === 'Rejected' ? 'bg-red-300 text-red-600' :
+                        'bg-gray-300 text-gray-600'
+                      }`}>
+                        {exchangeRequests[assignment._id]}
+                      </span>
+                    ) : (
+                      <span className="bg-gray-300 text-gray-600 px-2 py-1 rounded-md">Pending</span>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
