@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 const AddFaculty = () => {
   const [name, setName] = useState("");
-  // const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [dept, setDept] = useState("CS");
   const [message, setMessage] = useState("");
   const [designation, setDesignation] = useState("");
-  const [facultyData, setFacultyData] = useState([]); 
+  const [facultyData, setFacultyData] = useState([]);
   const [selectedFaculty, setSelectedFaculty] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     fetchFacultyData();
@@ -71,7 +73,6 @@ const AddFaculty = () => {
     setSelectedFaculty(faculty);
     setName(faculty.name);
     setDesignation(faculty.designation);
-    // setEmail(faculty.email);
     setDept(faculty.dept);
   };
 
@@ -100,11 +101,14 @@ const AddFaculty = () => {
   const clearForm = () => {
     setName("");
     setDesignation("");
-    // setEmail("");
     setPassword("");
     setDept("CSE");
     setMessage("");
     setSelectedFaculty(null);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -142,18 +146,24 @@ const AddFaculty = () => {
             />
           </div>
           {!selectedFaculty && (
-            <div>
+            <div className="relative">
               <label className="block mb-2 text-sm font-medium text-gray-700">
                 Password:
               </label>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:border-blue-300 pr-10"
               />
+              <span
+                className="absolute top-8 right-3 cursor-pointer"
+                onClick={togglePasswordVisibility}
+              >
+                {showPassword ? <VisibilityOffIcon /> : <RemoveRedEyeIcon />}
+              </span>
             </div>
           )}
           <div>

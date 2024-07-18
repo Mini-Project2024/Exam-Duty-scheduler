@@ -7,14 +7,18 @@ import logo from "../../images/logo.png";
 import LoginIcon from "@mui/icons-material/Login";
 import backgroundImg from "../../images/CEC.jpg";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import logo2 from "../../images/Ammembal.png"
+import logo2 from "../../images/Ammembal.png";
 import PersonIcon from '@mui/icons-material/Person';
-import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';import HttpsIcon from '@mui/icons-material/Https';
+import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
+import HttpsIcon from '@mui/icons-material/Https';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 function Index() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoginVisible, setIsLoginVisible] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLoginClick = () => {
     setIsLoginVisible(true);
@@ -24,26 +28,30 @@ function Index() {
     setIsLoginVisible(false);
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
       // Send login request to backend
       const response = await axios.post("http://localhost:3106/login", {
         username,
         password,
       });
-  
+
       // Check if the login was successful
       if (response.data.success) {
         // Store token and username in localStorage
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("username", response.data.username); // Assuming username is returned from backend
-  
+
         toast.success("User logged in successfully");
-  
+
         setTimeout(() => {
           if (username === "myadmin" && password === "admin123") {
             navigate("/main/assignduty");
@@ -60,7 +68,6 @@ function Index() {
       toast.error("Error during login");
     }
   };
-  
 
   return (
     <>
@@ -140,18 +147,24 @@ function Index() {
               className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3572EF] mb-4 text-black"
             />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col relative">
             <label htmlFor="password" className="text-black font-bold mb-2">
               Password <HttpsIcon/>
             </label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3572EF] mb-4 text-black"
+              className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3572EF] mb-4 text-black pr-10"
             />
+            <span
+              className="absolute top-10 right-3 cursor-pointer"
+              onClick={togglePasswordVisibility}
+            >
+              {showPassword ? <VisibilityOffIcon /> : <RemoveRedEyeIcon />}
+            </span>
           </div>
           <button
             type="submit"
