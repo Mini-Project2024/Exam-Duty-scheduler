@@ -783,7 +783,36 @@ app.get(
     }
   }
 );
+// -------------------------------------Admin side faculty details-----------------------
+app.get("/facultyDuty/:facultyName", async (req, res) => {
+  const { facultyName } = req.params;
 
+  try {
+    const assignments = await AssignmentModel.find()
+      .populate({
+        path: "examDateId",
+        select: ["_id", "examDate", "subjectcode", "examName", "semester", "session"],
+      })
+      .populate({
+        path: "facultyId",
+        select: ["_id", "name"],
+      });
+
+    // Filter assignments by faculty name
+    const filteredAssignments = assignments.filter(
+      assignment => assignment.facultyId.name === facultyName
+    );
+
+    res.status(200).json(filteredAssignments);
+  } catch (error) {
+    console.error("Error fetching assigned duty data:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching assigned duty data",
+      error: error.message,
+    });
+  }
+});
 // ------------------------------------------- demo work ---------------------------------------------
 
 // New route to get distinct exam dates with faculties
