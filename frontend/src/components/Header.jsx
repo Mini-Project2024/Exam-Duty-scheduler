@@ -10,7 +10,7 @@ const Header = ({ toggleTheme, themeClass,isDarkTheme, buttonThemeClass, transit
       <div className="container mx-auto px-4 py-2 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <img src={logo} alt="Logo" className="h-15 w-24" />
-          <span className="text-2xl font-bold text-[#07506f] tracking-wide drop-shadow-lg">Exam Duty Scheduler</span>
+          <span className="text-2xl font-bold text-[#07506f] tracking-wide drop-shadow-lg">Semester End Exam Duty Scheduler</span>
         </div>
         <div className="flex justify-between gap-6 items-center">
           {/* <button className="ml-2 w-5 h-5" onClick={toggleTheme}>

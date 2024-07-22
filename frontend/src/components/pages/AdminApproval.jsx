@@ -12,7 +12,7 @@ const AdminExchangeRequests = () => {
       try {
         const response = await axios.get('http://localhost:3106/admin/exchangeRequestslist', {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('adminToken')}`, // Admin token
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // Admin token
           },
         });
         setExchangeRequests(response.data);
@@ -31,7 +31,7 @@ const AdminExchangeRequests = () => {
     try {
       await axios.put(`http://localhost:3106/admin/approveExchangeRequest/${requestId}`, {}, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
       toast.success('Exchange request approved successfully');
@@ -50,7 +50,7 @@ const AdminExchangeRequests = () => {
     try {
       await axios.put(`http://localhost:3106/admin/rejectExchangeRequest/${requestId}`, {}, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
       toast.success('Exchange request rejected successfully');
@@ -111,26 +111,26 @@ const AdminExchangeRequests = () => {
           <tbody>
             {exchangeRequests.map((request) => (
               <tr key={request._id} className="bg-white">
-                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.originalAssignment.examDateId.examName}
+               <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                   {request.originalAssignment?.examDateId?.examName || "N/A"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.originalAssignment.examDateId.examDate}
+                   {request.originalAssignment?.examDateId?.examDate || "N/A"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.originalAssignment.facultyId.name}
+                  {request.originalAssignment?.facultyId?.name || "N/A"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.originalAssignment.session}
+                  {request.originalAssignment?.session || "N/A"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.exchangeDateId.examDate}
+                  {request.exchangeDateId?.examDate || "N/A"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.exchangeFacultyId.name}
+                  {request.exchangeFacultyId?.name || "N/A"}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                  {request.exchangeSession}
+                  {request.exchangeSession || "N/A"}
                 </td>
                 {/* <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                   {request.status}

@@ -56,9 +56,9 @@ const UserDetails = () => {
                 <th className='px-4 py-2 border border-gray-300'>
                   Session
                 </th>
-                <th className='px-4 py-2 border border-gray-300'>
+                {/* <th className='px-4 py-2 border border-gray-300'>
                   Subject
-                </th>
+                </th> */}
               </tr>
             </thead>
             <tbody>
@@ -76,9 +76,9 @@ const UserDetails = () => {
                   <td className='px-4 py-2 border border-gray-300 text-center'>
                     {assignment.examDateId.session}
                   </td>
-                  <td className='px-4 py-2 border border-gray-300 text-center'>
+                  {/* <td className='px-4 py-2 border border-gray-300 text-center'>
                     {assignment.subject}
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>
