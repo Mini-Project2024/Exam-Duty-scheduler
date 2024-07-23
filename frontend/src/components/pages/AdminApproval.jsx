@@ -12,9 +12,10 @@ const AdminExchangeRequests = () => {
       try {
         const response = await axios.get('http://localhost:3106/admin/exchangeRequestslist', {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('adminToken')}`, // Admin token
+            Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
           },
         });
+        console.log("Exchange Requests Data:", response.data); // Check the structure
         setExchangeRequests(response.data);
         setLoading(false);
       } catch (error) {
@@ -23,9 +24,10 @@ const AdminExchangeRequests = () => {
         setLoading(false);
       }
     };
-
+  
     fetchExchangeRequests();
   }, []);
+  
 
   const handleApproveRequest = async (requestId) => {
     try {
@@ -88,9 +90,9 @@ const AdminExchangeRequests = () => {
               <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Requested Session
               </th>
-              <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {/* <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Exchange Date
-              </th>
+              </th> */}
               <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Exchange Faculty
               </th>
@@ -123,9 +125,9 @@ const AdminExchangeRequests = () => {
                 <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                   {request.originalAssignment.session}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
+                {/* <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                   {request.exchangeDateId.examDate}
-                </td>
+                </td> */}
                 <td className="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                   {request.exchangeFacultyId.name}
                 </td>
