@@ -1029,22 +1029,28 @@ app.get("/admin/exchangeRequestslist", async (req, res) => {
         ],
       })
       .populate({
+        path: "exchangeDateId",
+        select:["_id","examDate"],
+      })
+      .populate({
         path: "exchangeFacultyId",
         select: ["_id", "name"],
       })
+<<<<<<< HEAD
       .populate({
         path: "exchangeDateId",
         select: ["examDate"],
       })
+=======
+>>>>>>> fd01d1e82e3566f0185c1e4f39e27ebe5f2e9007
       .sort({ createdAt: -1 })
       .exec();
-
+   
     // Filter out any requests with missing originalAssignment or examDateId
     const filteredRequests = exchangeRequests.filter(
       (request) =>
         request.originalAssignment && request.originalAssignment.examDateId
     );
-
     res.json(filteredRequests);
   } catch (error) {
     console.error("Error fetching exchange requests:", error);
@@ -1056,6 +1062,8 @@ app.get("/admin/exchangeRequestslist", async (req, res) => {
       });
   }
 });
+
+
 
 
 const updateAssignmentFaculty = async (assignmentId, newFacultyId) => {
@@ -1155,27 +1163,6 @@ app.put("/admin/approveExchangeRequest/:requestId", async (req, res) => {
   }
 });
 
-// Approve exchange request
-// app.put('/approveExchangeRequest/:requestId', async (req, res) => {
-//   try {
-//     const { requestId } = req.params;
-
-//     const exchangeRequest = await ExchangeRequest.findByIdAndUpdate(requestId, { status: 'Approved' }, { new: true });
-
-//     if (!exchangeRequest) {
-//       return res.status(404).json({ message: 'Exchange request not found' });
-//     }
-
-//     // Perform additional actions if needed (e.g., update assignments)
-
-//     res.json({ message: 'Exchange request approved successfully', data: exchangeRequest });
-//   } catch (error) {
-//     console.error('Error approving exchange request:', error);
-//     res.status(500).json({ message: 'Error approving exchange request', error: error.message });
-//   }
-// });
-
-// // Reject exchange request
 app.put("/admin/rejectExchangeRequest/:requestId", async (req, res) => {
   try {
     const { requestId } = req.params;
