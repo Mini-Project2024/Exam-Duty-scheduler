@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 export const logout = async () => {
   try {
     // Send a request to the backend logout route
-    const response = await fetch('http://localhost:3106/logout', {
+    const response = await fetch('https://exam-duty-scheduler-backend.onrender.com/logout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
