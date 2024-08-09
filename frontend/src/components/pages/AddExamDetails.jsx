@@ -26,7 +26,7 @@ const AddExamDetails = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const existingExam = await axios.get("http://localhost:3106/checkExamDate", {
+      const existingExam = await axios.get("https://exam-duty-scheduler-backend.onrender.com/checkExamDate", {
         params: {
           examDate: examDetails.examDate,
           subjectcode: examDetails.subjectcode, 
@@ -40,7 +40,7 @@ const AddExamDetails = () => {
         return;
       }
 
-      const response = await axios.post("http://localhost:3106/addExamdate", examDetails);
+      const response = await axios.post("https://exam-duty-scheduler-backend.onrender.com/addExamdate", examDetails);
       console.log("Exam details added:", response.data);
       toast.success("Exam details added successfully!");
       setTimeout(() => {
@@ -61,7 +61,7 @@ const AddExamDetails = () => {
 
   const fetchExamData = async () => {
     try {
-      const response = await axios.get("http://localhost:3106/getExamDetails");
+      const response = await axios.get("https://exam-duty-scheduler-backend.onrender.com/getExamDetails");
       setExamData(response.data);
     } catch (error) {
       console.error("Error fetching exam data:", error);
@@ -71,7 +71,7 @@ const AddExamDetails = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3106/deleteExamDate/${id}`);
+      await axios.delete(`https://exam-duty-scheduler-backend.onrender.com/deleteExamDate/${id}`);
       toast.success("Exam details deleted successfully!");
       fetchExamData();
     } catch (error) {
@@ -95,7 +95,7 @@ const AddExamDetails = () => {
     e.preventDefault();
     try {
       const response = await axios.put(
-        `http://localhost:3106/updateExamDate/${selectedExam._id}`,
+        `https://exam-duty-scheduler-backend.onrender.com/updateExamDate/${selectedExam._id}`,
         examDetails
       );
       console.log("Exam details updated:", response.data);

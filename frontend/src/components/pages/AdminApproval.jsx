@@ -10,7 +10,7 @@ const AdminExchangeRequests = () => {
   useEffect(() => {
     const fetchExchangeRequests = async () => {
       try {
-        const response = await axios.get('http://localhost:3106/admin/exchangeRequestslist', {
+        const response = await axios.get('https://exam-duty-scheduler-backend.onrender.com/admin/exchangeRequestslist', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`, // Admin token
           },
@@ -31,7 +31,7 @@ const AdminExchangeRequests = () => {
 
   const handleApproveRequest = async (requestId) => {
     try {
-      await axios.put(`http://localhost:3106/admin/approveExchangeRequest/${requestId}`, {}, {
+      await axios.put(`https://exam-duty-scheduler-backend.onrender.com/admin/approveExchangeRequest/${requestId}`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -50,7 +50,7 @@ const AdminExchangeRequests = () => {
 
   const handleRejectRequest = async (requestId) => {
     try {
-      await axios.put(`http://localhost:3106/admin/rejectExchangeRequest/${requestId}`, {}, {
+      await axios.put(`https://exam-duty-scheduler-backend.onrender.com/admin/rejectExchangeRequest/${requestId}`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },

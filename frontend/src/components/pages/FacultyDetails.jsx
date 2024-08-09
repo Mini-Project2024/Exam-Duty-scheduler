@@ -15,7 +15,7 @@ const FacultyDetails = () => {
 
   const fetchFacultyData = async () => {
     try {
-      const response = await axios.get("http://localhost:3106/faculty");
+      const response = await axios.get("https://exam-duty-scheduler-backend.onrender.com/faculty");
       const facultyData = response.data;
 
       const deptSet = new Set();
@@ -41,7 +41,7 @@ const FacultyDetails = () => {
 
   const fetchAssignedDutyData = async (facultyName) => {
     try {
-      const response = await axios.get(`http://localhost:3106/facultyDuty/${facultyName}`);
+      const response = await axios.get(`https://exam-duty-scheduler-backend.onrender.com/facultyDuty/${facultyName}`);
       const assignedDutyData = response.data;
   
       setAssignedDuty(assignedDutyData);

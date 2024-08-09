@@ -20,7 +20,7 @@ const AddFaculty = () => {
 
   const fetchFacultyData = async () => {
     try {
-      const response = await axios.get("http://localhost:3106/faculty");
+      const response = await axios.get("https://exam-duty-scheduler-backend.onrender.com/faculty");
       const sortedData = response.data.sort((a, b) => {
         return new Date(parseInt(b._id.substring(0, 8), 16) * 1000) - new Date(parseInt(a._id.substring(0, 8), 16) * 1000);
       });
@@ -37,7 +37,7 @@ const AddFaculty = () => {
       handleUpdateSubmit();
     } else {
       axios
-        .post("http://localhost:3106/addFaculty", {
+        .post("https://exam-duty-scheduler-backend.onrender.com/addFaculty", {
           name,
           designation,
           password,
@@ -60,7 +60,7 @@ const AddFaculty = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3106/deleteFaculty/${id}`);
+      await axios.delete(`https://exam-duty-scheduler-backend.onrender.com/deleteFaculty/${id}`);
       toast.success("Faculty member deleted successfully!");
       fetchFacultyData();
     } catch (error) {
@@ -79,7 +79,7 @@ const AddFaculty = () => {
   const handleUpdateSubmit = async () => {
     try {
       await axios.put(
-        `http://localhost:3106/updateFaculty/${selectedFaculty._id}`,
+        `https://exam-duty-scheduler-backend.onrender.com/updateFaculty/${selectedFaculty._id}`,
         {
           name,
           designation,

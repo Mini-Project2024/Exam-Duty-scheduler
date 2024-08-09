@@ -14,7 +14,7 @@ const UserDetails = () => {
           throw new Error('No token found');
         }
 
-        const response = await axios.get('http://localhost:3106/assignedFaculty/me', {
+        const response = await axios.get('https://exam-duty-scheduler-backend.onrender.com/assignedFaculty/me', {
           headers: {
             Authorization: `Bearer ${token}` // Include token in the Authorization header
           }

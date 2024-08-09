@@ -38,9 +38,9 @@ const AssignDuty = () => {
     try {
       const [facultyResponse, datesResponse, assignedResponse] =
         await Promise.all([
-          axios.get("http://localhost:3106/faculty"),
-          axios.get("http://localhost:3106/getExamDetails"),
-          axios.get("http://localhost:3106/assignedFaculty"),
+          axios.get("https://exam-duty-scheduler-backend.onrender.com/faculty"),
+          axios.get("https://exam-duty-scheduler-backend.onrender.com/getExamDetails"),
+          axios.get("https://exam-duty-scheduler-backend.onrender.com/assignedFaculty"),
         ]);
   
       const facultyData = facultyResponse.data.filter(
@@ -157,7 +157,7 @@ const AssignDuty = () => {
     const assignedFacultyName = updatedDates[dateIndex].assignedFacultyName;
 
     try {
-      await axios.post("http://localhost:3106/assignDuty", {
+      await axios.post("https://exam-duty-scheduler-backend.onrender.com/assignDuty", {
         examDateId: updatedDates[dateIndex]._id,
         facultyId: selectedFacultyForDate,
         facultyName: assignedFacultyName,
@@ -177,7 +177,7 @@ const AssignDuty = () => {
 
   const handleGenerateExcel = async () => {
     try {
-      const response = await axios.get("http://localhost:3106/generateExcel", {
+      const response = await axios.get("https://exam-duty-scheduler-backend.onrender.com/generateExcel", {
         params: {
           from: fromDate,
           to: toDate,

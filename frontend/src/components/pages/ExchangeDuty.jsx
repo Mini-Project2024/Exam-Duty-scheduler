@@ -25,7 +25,7 @@ const ExchangeDuty = () => {
           throw new Error('No token found');
         }
 
-        const response = await axios.get('http://localhost:3106/exchangeDuty', {
+        const response = await axios.get('https://exam-duty-scheduler-backend.onrender.com/exchangeDuty', {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -41,7 +41,7 @@ const ExchangeDuty = () => {
 
     const fetchAssignedFaculty = async () => {
       try {
-        const response = await axios.get('http://localhost:3106/assignedFaculty', {
+        const response = await axios.get('https://exam-duty-scheduler-backend.onrender.com/assignedFaculty', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
@@ -54,7 +54,7 @@ const ExchangeDuty = () => {
     };
     const fetchExchangeRequests = async () => {
       try {
-        const response = await axios.get('http://localhost:3106/admin/exchangeRequestslist', {
+        const response = await axios.get('https://exam-duty-scheduler-backend.onrender.com/admin/exchangeRequestslist', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
@@ -118,7 +118,7 @@ const ExchangeDuty = () => {
         throw new Error('No token found');
       }
 
-      const response = await axios.post(`http://localhost:3106/requestExchange/${selectedAssignmentId}`, {
+      const response = await axios.post(`https://exam-duty-scheduler-backend.onrender.com/requestExchange/${selectedAssignmentId}`, {
         exchangeDateId,
         exchangeFacultyId,
         exchangeSession
@@ -136,7 +136,7 @@ const ExchangeDuty = () => {
       }));
 
       // Fetch updated assignments
-      const updatedAssignments = await axios.get('http://localhost:3106/exchangeDuty', {
+      const updatedAssignments = await axios.get('https://exam-duty-scheduler-backend.onrender.com/exchangeDuty', {
         headers: {
           Authorization: `Bearer ${token}`
         }

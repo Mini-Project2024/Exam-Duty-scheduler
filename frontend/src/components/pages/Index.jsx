@@ -39,7 +39,7 @@ function Index() {
 
     try {
       // Send login request to backend
-      const response = await axios.post("http://localhost:3106/login", {
+      const response = await axios.post("https://exam-duty-scheduler-backend.onrender.com/login", {
         username,
         password,
       });
