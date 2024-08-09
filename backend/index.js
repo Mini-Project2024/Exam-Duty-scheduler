@@ -1036,13 +1036,6 @@ app.get("/admin/exchangeRequestslist", async (req, res) => {
         path: "exchangeFacultyId",
         select: ["_id", "name"],
       })
-<<<<<<< HEAD
-      .populate({
-        path: "exchangeDateId",
-        select: ["examDate"],
-      })
-=======
->>>>>>> fd01d1e82e3566f0185c1e4f39e27ebe5f2e9007
       .sort({ createdAt: -1 })
       .exec();
    
