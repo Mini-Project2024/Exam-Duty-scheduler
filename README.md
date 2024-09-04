@@ -66,6 +66,8 @@ To install the Exam Duty Scheduler, follow these steps:
 13. Roles of Faculty:
     + May view their work assigned
     + May shift thier work with other faculty with the `admin` approval.
+      
+<b>Note:</b> If you're unable to log in using the provided link, it may indicate that the backend server is currently down. Please reach out to the repository owner for assistance in resolving the issue.
 
 ## Contributors
 
